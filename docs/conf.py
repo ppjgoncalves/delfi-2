@@ -189,6 +189,12 @@ html_static_path = ['_static']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'delfidoc'
 
+# Additional options
+html_context = {
+    "display_github": True,
+    "last_updated": True,
+    "commit": False
+}
 
 # -- Options for LaTeX output ---------------------------------------------
 
