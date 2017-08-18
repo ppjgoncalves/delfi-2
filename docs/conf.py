@@ -195,6 +195,8 @@ html_context = {
     "last_updated": True,
     "commit": False
 }
+github_user = 'mackelab'
+github_repo = 'delfi'
 
 # -- Options for LaTeX output ---------------------------------------------
 
