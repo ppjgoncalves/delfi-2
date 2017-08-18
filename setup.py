@@ -8,7 +8,11 @@ setup(
     description='Density estimation likelihood-free inference',
     url='https://github.com/mackelab/delfi',
     author='Mackelab',
-    packages=['delfi'],
+    packages=['delfi', 'delfi.distribution', 'delfi.distribution.mixture',
+              'delfi.generator', 'delfi.inference', 'delfi.kernel',
+              'delfi.neuralnet', 'delfi.neuralnet.layers',
+              'delfi.neuralnet.loss', 'delfi.simulator', 'delfi.summarystats',
+              'delfi.utils'],
     license='BSD',
     install_requires=['dill', 'lasagne', 'numpy', 'scipy', 'theano', 'tqdm'],
     dependency_links=[
