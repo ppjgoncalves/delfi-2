@@ -28,4 +28,5 @@ script:
   - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=delfi --pep8;
   - travis-sphinx -n -s docs/ build
 after_success:
+  - coveralls
   - travis-sphinx deploy
