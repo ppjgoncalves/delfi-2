@@ -61,7 +61,8 @@ class SimulatorBase(metaclass=ABCMetaDoc):
         Returns
         -------
         dict : dictionary with data
-            The dictionary must contain a key data that contains the results of the forward run. Additional entries can be present.
+            The dictionary must contain a key data that contains the results of
+            the forward run. Additional entries can be present.
         """
         pass
 

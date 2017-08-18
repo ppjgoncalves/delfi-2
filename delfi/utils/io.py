@@ -26,6 +26,7 @@ def load(file):
     else:
         raise NotImplementedError
 
+
 def load_pkl(file):
     """Loads data from pickle
 
@@ -41,6 +42,7 @@ def load_pkl(file):
     data = pickle.load(f)
     f.close()
     return data
+
 
 def save(obj, file):
     """Saves inference result
@@ -58,9 +60,10 @@ def save(obj, file):
         del obj.observables
         data['inference'] = obj
         save_pkl(data, file)
-        obj.compile_observables()        
+        obj.compile_observables()
     else:
         raise NotImplementedError
+
 
 def save_pkl(data, file):
     """Saves data to a pickle

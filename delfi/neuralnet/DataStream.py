@@ -4,23 +4,32 @@ import theano
 
 dtype = theano.config.floatX
 
+
 class DataStream(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def gen(self, N):
         """Generates a new data batch of size N"""
         raise NotImplementedError
 
+
 class DataSubSampler(DataStream):
     """Given a data set, subsamples mini-batches from it"""
+
     def __init__(self, xs, seed=None):
         N = xs[0].shape[0]
         self.index_stream = IndexSubSampler(N, seed=seed)
-        self.xs = [theano.shared(x.astype(dtype), name='data'+str(i)) for i, x in enumerate(xs)]
+        self.xs = [
+            theano.shared(
+                x.astype(dtype),
+                name='data' +
+                str(i)) for i,
+            x in enumerate(xs)]
 
     def gen(self, N):
         """Generates a new data batch of size N from the data set"""
         n = self.index_stream.gen(N)
         return [x[n] for x in self.xs]
+
 
 class IndexSubSampler(DataStream):
     def __init__(self, num_idx, seed=None):

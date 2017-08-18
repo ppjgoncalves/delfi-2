@@ -49,7 +49,9 @@ class FullyConnectedLayer(lasagne.layers.Layer):
                                  name='mb', mp=True)
 
         if self.svi:
-            self._srng = RandomStreams(lasagne.random.get_rng().randint(1, 2147462579))
+            self._srng = RandomStreams(
+                lasagne.random.get_rng().randint(
+                    1, 2147462579))
             self.sW = self.add_param(sW_init,
                                      (self.input_shape[1], self.n_units),
                                      name='sW', sp=True)
@@ -63,7 +65,7 @@ class FullyConnectedLayer(lasagne.layers.Layer):
         if not self.svi or deterministic:
             return self.actfun(ma)
         else:
-            sa = tt.dot(input**2, tt.exp(2*self.sW)) + tt.exp(2*self.sb)
+            sa = tt.dot(input**2, tt.exp(2 * self.sW)) + tt.exp(2 * self.sb)
             ua = self._srng.normal((input.shape[0], self.n_units), dtype=dtype)
             return self.actfun(tt.sqrt(sa) * ua + ma)
 

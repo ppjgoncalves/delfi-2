@@ -30,10 +30,30 @@ class MoT(MixtureBase):
             If provided, random number generator will be seeded
         """
         if ms is not None:
-            super().__init__(a=np.asarray(a), ncomp=len(ms), ndim=np.asarray(ms[0]).ndim, seed=seed)
-            self.xs = [StudentsT(m=m, S=S, dof=dof, seed=self.gen_newseed()) for m, S, dof in zip(ms, Ss, dofs)]
+            super().__init__(
+                a=np.asarray(a),
+                ncomp=len(ms),
+                ndim=np.asarray(
+                    ms[0]).ndim,
+                seed=seed)
+            self.xs = [
+                StudentsT(
+                    m=m,
+                    S=S,
+                    dof=dof,
+                    seed=self.gen_newseed()) for m,
+                S,
+                dof in zip(
+                    ms,
+                    Ss,
+                    dofs)]
         elif xs is not None:
-            super().__init__(a=np.asarray(a), ncomp=len(xs), ndim=np.asarray(xs[0]).ndim, seed=seed)
+            super().__init__(
+                a=np.asarray(a),
+                ncomp=len(xs),
+                ndim=np.asarray(
+                    xs[0]).ndim,
+                seed=seed)
             self.xs = xs
         else:
             raise ValueError('Mean information missing')
@@ -41,7 +61,7 @@ class MoT(MixtureBase):
     @copy_ancestor_docstring
     def gen(self, n_samples=1):
         # See BaseMixture.py for docstring
-        ii = self.gen_comp(n_samples) # n_samples,
+        ii = self.gen_comp(n_samples)  # n_samples,
 
         ns = [np.sum((ii == i).astype(int)) for i in range(self.n_components)]
         samples = [x.gen(n) for x, n in zip(self.xs, ns)]
@@ -57,6 +77,12 @@ class MoT(MixtureBase):
             raise NotImplementedError
 
         ps = np.array([c.eval(x, ii=None, log=log) for c in self.xs]).T
-        res = scipy.misc.logsumexp(ps + np.log(self.a), axis=1) if log else np.dot(ps, self.a)
+        res = scipy.misc.logsumexp(
+            ps +
+            np.log(
+                self.a),
+            axis=1) if log else np.dot(
+            ps,
+            self.a)
 
         return res

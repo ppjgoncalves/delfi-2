@@ -25,9 +25,18 @@ class MixtureWeightsLayer(FullyConnectedLayer):
         self.n_units = n_units
 
         if n_units > 1:
-            super(MixtureWeightsLayer, self).__init__(incoming, n_units,
-                svi=svi, mW_init=mW_init, mb_init=mb_init, sW_init=sW_init,
-                sb_init=sb_init, actfun=actfun, **kwargs)
+            super(
+                MixtureWeightsLayer,
+                self).__init__(
+                incoming,
+                n_units,
+                svi=svi,
+                mW_init=mW_init,
+                mb_init=mb_init,
+                sW_init=sW_init,
+                sb_init=sb_init,
+                actfun=actfun,
+                **kwargs)
         else:
             # init of lasagne.layers.Layer
             super(FullyConnectedLayer, self).__init__(incoming, **kwargs)
@@ -35,7 +44,11 @@ class MixtureWeightsLayer(FullyConnectedLayer):
     def get_output_for(self, input, deterministic=False, **kwargs):
         """Returns matrix with shape (batch, n_units)"""
         if self.n_units > 1:
-            return super(MixtureWeightsLayer, self).get_output_for(input,
-                deterministic=deterministic, **kwargs)
+            return super(
+                MixtureWeightsLayer,
+                self).get_output_for(
+                input,
+                deterministic=deterministic,
+                **kwargs)
         else:
             return tt.ones((input.shape[0], self.n_units), dtype=dtype)

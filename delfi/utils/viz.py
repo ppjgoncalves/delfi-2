@@ -4,6 +4,7 @@ import numpy as np
 import os
 import time
 
+
 def loss(losses, key='trn', loss_clipping=1000., title=''):
     """Given an info dict, plot loss"""
 
@@ -12,7 +13,10 @@ def loss(losses, key='trn', loss_clipping=1000., title=''):
 
     clip_idx = np.where(y > loss_clipping)[0]
     if len(clip_idx) > 0:
-        print('warning: loss exceeds threshold of {:.2f} in total {} time(s); values will be clipped'.format(loss_clipping, len(clip_idx)))
+        print(
+            'warning: loss exceeds threshold of {:.2f} in total {} time(s); values will be clipped'.format(
+                loss_clipping,
+                len(clip_idx)))
 
     y[clip_idx] = loss_clipping
 
@@ -27,6 +31,7 @@ def loss(losses, key='trn', loss_clipping=1000., title=''):
     ax.set_ylabel(options['ylabel'])
 
     return fig, ax
+
 
 def dist(dist, title=''):
     """Given dist, plot histogram"""
@@ -43,6 +48,7 @@ def dist(dist, title=''):
     ax.set_ylabel(options['ylabel'])
     ax.set_title(options['title'])
     return fig, ax
+
 
 def info(info, html=False, title=None):
     """Given info dict, produce info text"""
@@ -102,15 +108,17 @@ def probs2contours(probs, levels):
     for level in levels:
         contours[cum_probs <= level] = level
 
-    # make sure contours have the order and the shape of the original probability array
+    # make sure contours have the order and the shape of the original
+    # probability array
     contours = np.reshape(contours[idx_unsort], shape)
 
     return contours
 
+
 def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
-        resolution=500, labels_params=None, ticks = False, diag_only=False,
-        diag_only_cols=4, diag_only_rows=4, figsize=(5,5), fontscale=1,
-        partial=False, samples=None, col1='k', col2='b'):
+             resolution=500, labels_params=None, ticks=False, diag_only=False,
+             diag_only_cols=4, diag_only_rows=4, figsize=(5, 5), fontscale=1,
+             partial=False, samples=None, col1='k', col2='b'):
     """Plots marginals of a pdf, for each variable and pair of variables.
 
     Parameters
@@ -146,11 +154,12 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
     if samples is not None:
         contours = True
         if levels is None:
-            levels=(0.68, 0.95)
-        lims_min = np.min(samples,axis=1)
-        lims_max = np.max(samples,axis=1)
+            levels = (0.68, 0.95)
+        lims_min = np.min(samples, axis=1)
+        lims_max = np.max(samples, axis=1)
         lims = np.asarray(lims)
-        lims = np.concatenate((lims_min.reshape(-1,1),lims_max.reshape(-1,1)),axis=1)
+        lims = np.concatenate(
+            (lims_min.reshape(-1, 1), lims_max.reshape(-1, 1)), axis=1)
     else:
         lims = np.asarray(lims)
         lims = np.tile(lims, [pdf.ndim, 1]) if lims.ndim == 1 else lims
@@ -160,23 +169,24 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
         fig, ax = plt.subplots(1, 1, facecolor='white', figsize=figsize)
 
         if samples is not None:
-            ax.hist(samples[i,:], bins=100, normed = True,
-                     color=col1,
-                     edgecolor=col1)
+            ax.hist(samples[i, :], bins=100, normed=True,
+                    color=col1,
+                    edgecolor=col1)
 
-        xx = np.linspace(lims[0,0], lims[0,1], resolution)
+        xx = np.linspace(lims[0, 0], lims[0, 1], resolution)
 
         pp = pdf.eval(xx[:, np.newaxis], log=False)
         ax.plot(xx, pp, color=col2)
         ax.set_xlim(lims[0])
         ax.set_ylim([0, ax.get_ylim()[1]])
-        if gt is not None: ax.vlines(gt, 0, ax.get_ylim()[1], color='r')
+        if gt is not None:
+            ax.vlines(gt, 0, ax.get_ylim()[1], color='r')
 
         if ticks:
             ax.get_yaxis().set_tick_params(which='both', direction='out')
             ax.get_xaxis().set_tick_params(which='both', direction='out')
-            ax.set_xticks(np.linspace(lims[0, 0], lims[0, 1],2))
-            ax.set_yticks(np.linspace(min(pp),max(pp),2))
+            ax.set_xticks(np.linspace(lims[0, 0], lims[0, 1], 2))
+            ax.set_yticks(np.linspace(min(pp), max(pp), 2))
             ax.xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
             ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
         else:
@@ -206,14 +216,14 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
 
                 if i == j:
                     if samples is not None:
-                        ax[i, j].hist(samples[i,:], bins=100, normed = True,
-                                 color=col1,
-                                 edgecolor=col1)
+                        ax[i, j].hist(samples[i, :], bins=100, normed=True,
+                                      color=col1,
+                                      edgecolor=col1)
                     xx = np.linspace(lims[i, 0], lims[i, 1], resolution)
                     pp = pdf.eval(xx, ii=[i], log=False)
 
                     if diag_only:
-                        c+=1
+                        c += 1
                     else:
                         r = i
                         c = j
@@ -222,85 +232,98 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
                     ax[r, c].set_xlim(lims[i])
                     ax[r, c].set_ylim([0, ax[r, c].get_ylim()[1]])
 
-                    if gt is not None: ax[r, c].vlines(gt[i], 0, ax[r, c].get_ylim()[1], color='r')
+                    if gt is not None:
+                        ax[r, c].vlines(
+                            gt[i], 0, ax[r, c].get_ylim()[1], color='r')
 
                     if ticks:
-                        ax[r, c].get_yaxis().set_tick_params(which='both', direction='out',
-                                                             labelsize = fontscale*20)
-                        ax[r, c].get_xaxis().set_tick_params(which='both', direction='out',
-                                                             labelsize = fontscale*20)
+                        ax[r, c].get_yaxis().set_tick_params(
+                            which='both', direction='out', labelsize=fontscale * 20)
+                        ax[r, c].get_xaxis().set_tick_params(
+                            which='both', direction='out', labelsize=fontscale * 20)
 #                         ax[r, c].locator_params(nbins=3)
-                        ax[r, c].set_xticks(np.linspace(lims[i, 0], lims[j, 1],2))
-                        ax[r, c].set_yticks(np.linspace(min(pp),max(pp),2))
-                        ax[r, c].xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
-                        ax[r, c].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.1f'))
+                        ax[r, c].set_xticks(np.linspace(
+                            lims[i, 0], lims[j, 1], 2))
+                        ax[r, c].set_yticks(np.linspace(min(pp), max(pp), 2))
+                        ax[r, c].xaxis.set_major_formatter(
+                            mpl.ticker.FormatStrFormatter('%.1f'))
+                        ax[r, c].yaxis.set_major_formatter(
+                            mpl.ticker.FormatStrFormatter('%.1f'))
                     else:
                         ax[r, c].get_xaxis().set_ticks([])
                         ax[r, c].get_yaxis().set_ticks([])
 
                     if labels_params is not None:
-                        ax[r, c].set_xlabel(labels_params[i], fontsize=fontscale*15)
+                        ax[r, c].set_xlabel(
+                            labels_params[i], fontsize=fontscale * 15)
                     else:
                         ax[r, c].set_xlabel([])
 
-                    x0,x1 = ax[r, c].get_xlim()
-                    y0,y1 = ax[r, c].get_ylim()
-                    ax[r, c].set_aspect((x1-x0)/(y1-y0))
+                    x0, x1 = ax[r, c].get_xlim()
+                    y0, y1 = ax[r, c].get_ylim()
+                    ax[r, c].set_aspect((x1 - x0) / (y1 - y0))
 
-
-                    if partial and i == rows-1:
-                        ax[i, j].text(x1+(x1-x0)/6., (y0+y1)/2., '...', fontsize=fontscale*25)
-                        plt.text(x1+(x1-x0)/8.4, y0-(y1-y0)/6., '...', fontsize=fontscale*25,rotation=-45)
+                    if partial and i == rows - 1:
+                        ax[i, j].text(x1 + (x1 - x0) / 6., (y0 + y1) /
+                                      2., '...', fontsize=fontscale * 25)
+                        plt.text(x1 + (x1 - x0) / 8.4, y0 - (y1 - y0) /
+                                 6., '...', fontsize=fontscale * 25, rotation=-45)
 
                 else:
                     if diag_only:
                         continue
 
-                    if i>j:
+                    if i > j:
                         ax[i, j].get_yaxis().set_visible(False)
                         ax[i, j].get_xaxis().set_visible(False)
-                        ax[i,j].set_axis_off()
+                        ax[i, j].set_axis_off()
                         continue
 
                     if samples is not None:
-                        H, xedges, yedges = np.histogram2d(samples[i,:], samples[j,:], bins=30, normed = True)
-                        ax[i, j].imshow(H.T, origin='lower',
-                                   extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]])
+                        H, xedges, yedges = np.histogram2d(
+                            samples[i, :], samples[j, :], bins=30, normed=True)
+                        ax[i, j].imshow(H.T, origin='lower', extent=[
+                                        xedges[0], xedges[-1], yedges[0], yedges[-1]])
 
                     xx = np.linspace(lims[i, 0], lims[i, 1], resolution)
-                    yy = np.linspace(lims[j ,0], lims[j, 1], resolution)
+                    yy = np.linspace(lims[j, 0], lims[j, 1], resolution)
                     X, Y = np.meshgrid(xx, yy)
-                    xy = np.concatenate([X.reshape([-1, 1]), Y.reshape([-1, 1])], axis=1)
+                    xy = np.concatenate(
+                        [X.reshape([-1, 1]), Y.reshape([-1, 1])], axis=1)
                     pp = pdf.eval(xy, ii=[i, j], log=False)
                     pp = pp.reshape(list(X.shape))
                     if contours:
-                        ax[i, j].contour(X, Y, probs2contours(pp, levels), levels, colors=('w','y'))
+                        ax[i, j].contour(X, Y, probs2contours(
+                            pp, levels), levels, colors=('w', 'y'))
                     else:
-                        ax[i, j].imshow(pp,origin='lower', cmap = cmaps.parula,
-                                        extent=[lims[i, 0],lims[i, 1],lims[j ,0],lims[j ,1]],
+                        ax[i, j].imshow(pp, origin='lower', cmap=cmaps.parula,
+                                        extent=[lims[i, 0], lims[i, 1], lims[j, 0], lims[j, 1]],
                                         aspect='auto', interpolation='none')
                     ax[i, j].set_xlim(lims[i])
                     ax[i, j].set_ylim(lims[j])
 
-                    if gt is not None: ax[i, j].plot(gt[i], gt[j], 'r.', ms=10, markeredgewidth=0.0)
+                    if gt is not None:
+                        ax[i, j].plot(gt[i], gt[j], 'r.', ms=10,
+                                      markeredgewidth=0.0)
 
                     ax[i, j].get_xaxis().set_ticks([])
                     ax[i, j].get_yaxis().set_ticks([])
-                    ax[i,j].set_axis_off()
+                    ax[i, j].set_axis_off()
 
-                    x0,x1 = ax[i, j].get_xlim()
-                    y0,y1 = ax[i, j].get_ylim()
-                    ax[i, j].set_aspect((x1-x0)/(y1-y0))
+                    x0, x1 = ax[i, j].get_xlim()
+                    y0, y1 = ax[i, j].get_ylim()
+                    ax[i, j].set_aspect((x1 - x0) / (y1 - y0))
 
-                    if partial and j == cols-1:
-                        ax[i, j].text(x1+(x1-x0)/6., (y0+y1)/2., '...', fontsize=fontscale*25)
+                    if partial and j == cols - 1:
+                        ax[i, j].text(x1 + (x1 - x0) / 6., (y0 + y1) /
+                                      2., '...', fontsize=fontscale * 25)
 
-
-                if diag_only and c == cols-1:
+                if diag_only and c == cols - 1:
                     c = -1
                     r += 1
 
     return fig, ax
+
 
 def plot_hist_marginals(data, lims=None, gt=None):
     """Plots marginal histograms and pairwise scatter plots of a dataset"""
@@ -310,8 +333,10 @@ def plot_hist_marginals(data, lims=None, gt=None):
         fig, ax = plt.subplots(1, 1, facecolor='white')
         ax.hist(data, n_bins, normed=True)
         ax.set_ylim([0, ax.get_ylim()[1]])
-        if lims is not None: ax.set_xlim(lims)
-        if gt is not None: ax.vlines(gt, 0, ax.get_ylim()[1], color='r')
+        if lims is not None:
+            ax.set_xlim(lims)
+        if gt is not None:
+            ax.vlines(gt, 0, ax.get_ylim()[1], color='r')
 
     else:
         n_dim = data.shape[1]
@@ -328,14 +353,18 @@ def plot_hist_marginals(data, lims=None, gt=None):
                 if i == j:
                     ax[i, j].hist(data[:, i], n_bins, normed=True)
                     ax[i, j].set_ylim([0, ax[i, j].get_ylim()[1]])
-                    if lims is not None: ax[i, j].set_xlim(lims[i])
-                    if gt is not None: ax[i, j].vlines(gt[i], 0, ax[i, j].get_ylim()[1], color='r')
+                    if lims is not None:
+                        ax[i, j].set_xlim(lims[i])
+                    if gt is not None:
+                        ax[i, j].vlines(
+                            gt[i], 0, ax[i, j].get_ylim()[1], color='r')
 
                 else:
                     ax[i, j].plot(data[:, i], data[:, j], 'k.', ms=2)
                     if lims is not None:
                         ax[i, j].set_xlim(lims[i])
                         ax[i, j].set_ylim(lims[j])
-                    if gt is not None: ax[i, j].plot(gt[i], gt[j], 'r.', ms=8)
+                    if gt is not None:
+                        ax[i, j].plot(gt[i], gt[j], 'r.', ms=8)
 
     return fig, ax

@@ -58,7 +58,7 @@ class SNPE(InferenceBase):
             prior = distribution_pyop(self.generator.prior)
             proposal = distribution_pyop(self.generator.proposal)
             y_zt = tt.constant(self.params_std, dtype=dtype) * self.network.y \
-                 + tt.constant(self.params_mean, dtype=dtype)
+                + tt.constant(self.params_mean, dtype=dtype)
             prior_eval = prior(y_zt)
             proposal_eval = proposal(y_zt)
         else:
@@ -74,10 +74,11 @@ class SNPE(InferenceBase):
                 kl = svi_kl_zero(self.network.mps, self.network.sps,
                                  self.reg_lambda)
             else:
-                # keep weights close to the init (i.e., those of previous round)
+                # keep weights close to the init (i.e., those of previous
+                # round)
                 kl = svi_kl_init(self.network.mps, self.network.sps)
 
-            loss = loss + 1/N * kl
+            loss = loss + 1 / N * kl
 
         # adding nodes to dict s.t. they can be monitored during training
         self.observables['loss.iws'] = iws

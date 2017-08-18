@@ -62,7 +62,7 @@ class CDELFI(InferenceBase):
         if self.svi:
             kl = svi_kl_zero(self.network.mps, self.network.sps,
                              self.reg_lambda)
-            loss = loss + 1/N * kl
+            loss = loss + 1 / N * kl
 
         # adding nodes to dict s.t. they can be monitored during training
         self.observables['loss.kl'] = kl
@@ -100,7 +100,7 @@ class CDELFI(InferenceBase):
         logs = []
         trn_datasets = []
 
-        for r in range(1, n_rounds+1):  # start at 1
+        for r in range(1, n_rounds + 1):  # start at 1
             trn_data = self.gen(n_train)  # z-transformed params and stats
 
             # algorithm 2 of Papamakarios and Murray
@@ -110,13 +110,14 @@ class CDELFI(InferenceBase):
 
                 # create new network
                 network_spec = self.network.spec_dict.copy()
-                network_spec.update({'n_components' : self.n_components})
+                network_spec.update({'n_components': self.n_components})
                 self.network = NeuralNet(**network_spec)
                 new_params = self.network.params_dict
 
                 # set weights of new network
                 # weights of additional components are duplicates
-                for p in [s for s in new_params if 'means' in s or 'precisions' in s]:
+                for p in [
+                        s for s in new_params if 'means' in s or 'precisions' in s]:
                     new_params[p] = old_params[p[:-1] + '0']
                 self.network.params_dict = new_params
 
@@ -152,7 +153,8 @@ class CDELFI(InferenceBase):
             if 'Uniform' in str(type(self.generator.prior)):
                 posterior = mog / self.generator.proposal
             elif 'Gaussian' in str(type(self.generator.prior)):
-                posterior = (mog * self.generator.prior)/self.generator.proposal
+                posterior = (mog * self.generator.prior) / \
+                    self.generator.proposal
             else:
                 raise NotImplemented
 

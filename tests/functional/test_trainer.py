@@ -22,8 +22,13 @@ def test_trainer_updates():
 
     trn_data = g.gen(100)
 
-    nn = NeuralNet(n_components=n_components, n_hiddens=[10], n_inputs=n_params,
-                   n_outputs=n_params, seed=seed, svi=svi)
+    nn = NeuralNet(
+        n_components=n_components,
+        n_hiddens=[10],
+        n_inputs=n_params,
+        n_outputs=n_params,
+        seed=seed,
+        svi=svi)
     loss = -tt.mean(nn.lprobs)
 
     t = Trainer(network=nn, loss=loss, trn_data=trn_data)

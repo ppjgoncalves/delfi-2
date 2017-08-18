@@ -12,7 +12,8 @@ class ABCMetaDoc(type, metaclass=abc.ABCMeta):
         classdict = super().__prepare__(name, bases, *kwds)
 
         # Inject decorators into class namespace
-        classdict['copy_ancestor_docstring'] = partial(_copy_ancestor_docstring, mro(*bases))
+        classdict['copy_ancestor_docstring'] = partial(
+            _copy_ancestor_docstring, mro(*bases))
 
         return classdict
 
@@ -24,15 +25,18 @@ class ABCMetaDoc(type, metaclass=abc.ABCMeta):
         if 'copy_ancestor_docstring' in classdict:
 
             # Make sure that class definition hasn't messed with decorators
-            copy_impl = getattr(classdict['copy_ancestor_docstring'], 'func', None)
+            copy_impl = getattr(
+                classdict['copy_ancestor_docstring'], 'func', None)
             if copy_impl is not _copy_ancestor_docstring:
-                raise RuntimeError('No copy_ancestor_docstring attribute may be created '
-                                   'in classes using the InheritableDocstrings metaclass')
+                raise RuntimeError(
+                    'No copy_ancestor_docstring attribute may be created '
+                    'in classes using the InheritableDocstrings metaclass')
 
             # Delete decorators from class namespace
             del classdict['copy_ancestor_docstring']
 
         return super().__new__(cls, name, bases, classdict)
+
 
 def _copy_ancestor_docstring(mro, fn):
     '''Decorator to set docstring for *fn* from *mro*
@@ -55,6 +59,7 @@ def _copy_ancestor_docstring(mro, fn):
 
     return fn
 
+
 def mro(*bases):
     """Calculate the Method Resolution Order of bases using the C3 algorithm.
 
@@ -70,22 +75,22 @@ def mro(*bases):
     seqs = [list(C.__mro__) for C in bases] + [list(bases)]
     res = []
     while True:
-      non_empty = list(filter(None, seqs))
-      if not non_empty:
-          # Nothing left to process, we're done.
-          return tuple(res)
-      for seq in non_empty:  # Find merge candidates among seq heads.
-          candidate = seq[0]
-          not_head = [s for s in non_empty if candidate in s[1:]]
-          if not_head:
-              # Reject the candidate.
-              candidate = None
-          else:
-              break
-      if not candidate:
-          raise TypeError("inconsistent hierarchy, no C3 MRO is possible")
-      res.append(candidate)
-      for seq in non_empty:
-          # Remove candidate.
-          if seq[0] == candidate:
-              del seq[0]
+        non_empty = list(filter(None, seqs))
+        if not non_empty:
+            # Nothing left to process, we're done.
+            return tuple(res)
+        for seq in non_empty:  # Find merge candidates among seq heads.
+            candidate = seq[0]
+            not_head = [s for s in non_empty if candidate in s[1:]]
+            if not_head:
+                # Reject the candidate.
+                candidate = None
+            else:
+                break
+        if not candidate:
+            raise TypeError("inconsistent hierarchy, no C3 MRO is possible")
+        res.append(candidate)
+        for seq in non_empty:
+            # Remove candidate.
+            if seq[0] == candidate:
+                del seq[0]

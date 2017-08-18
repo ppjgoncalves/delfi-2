@@ -8,7 +8,7 @@ setup(
     description='Density estimation likelihood-free inference',
     url='https://github.com/mackelab/delfi',
     install_requires=['dill', 'lasagne', 'numpy', 'scipy', 'theano', 'tqdm'],
-    dependency_links = [
-      'https://github.com/Lasagne/Lasagne/archive/master.zip#egg=lasagne',
+    dependency_links=[
+        'https://github.com/Lasagne/Lasagne/archive/master.zip#egg=lasagne',
     ]
 )

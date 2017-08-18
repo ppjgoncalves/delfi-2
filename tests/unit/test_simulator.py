@@ -13,8 +13,11 @@ def test_gauss_1d_simulator_output():
     thetas = np.tile(np.array([0.]), (n_samples, 1))
     sample_list = s.gen(thetas)
 
-    assert len(sample_list) == n_samples, 'the list should have as many entries as there are samples'
-    assert isinstance(sample_list[0][0], dict), 'the entries should be dictionaries'
+    assert len(
+        sample_list) == n_samples, 'the list should have as many entries as there are samples'
+    assert isinstance(
+        sample_list[0][0], dict), 'the entries should be dictionaries'
+
 
 def test_gauss_2d_data_dimension():
     """Test the data dimensionality output of the Gauss Simulator using a 2D Gaussian

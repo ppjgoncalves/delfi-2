@@ -1,6 +1,7 @@
 import delfi.kernel as dk
 import numpy as np
 
+
 def test_uniform_1d():
     obs = np.array([[0.]])
     k = dk.Uniform(obs=obs)

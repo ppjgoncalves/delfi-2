@@ -32,6 +32,7 @@ def distribution_pyop(dist):
         return dist.eval(theta, log=False).astype(dtype).reshape(-1,)
     return op
 
+
 def kernel_pyop(kernel):
     """Factory function to build kernel op for graph
 

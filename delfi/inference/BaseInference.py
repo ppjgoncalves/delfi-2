@@ -26,6 +26,7 @@ class InferenceBase(metaclass=ABCMetaDoc):
         Dictionary containing theano variables that can be monitored while
         training the neural network.
     """
+
     def __init__(self, generator, seed=None, priorzt=False, **kwargs):
         self.seed = seed
         if seed is not None:
@@ -109,7 +110,7 @@ class InferenceBase(metaclass=ABCMetaDoc):
         """Generate monitor dict from list of variable names"""
         if monitor is not None:
             observe = {}
-            if type(monitor) == str:
+            if isinstance(monitor, str):
                 monitor = [monitor]
             for m in monitor:
                 observe[m] = self.observables[m]

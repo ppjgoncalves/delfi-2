@@ -5,6 +5,7 @@ from delfi.neuralnet.NeuralNet import NeuralNet
 
 dtype = theano.config.floatX
 
+
 def test_lprobs():
     n_components = 2
     seed = 42
@@ -15,7 +16,7 @@ def test_lprobs():
 
     eval_lprobs = theano.function([nn.x, nn.y], nn.lprobs)
 
-    res = eval_lprobs(np.array([[1.],[2.]], dtype=dtype),
-                      np.array([[1.],[2.]], dtype=dtype))
+    res = eval_lprobs(np.array([[1.], [2.]], dtype=dtype),
+                      np.array([[1.], [2.]], dtype=dtype))
 
     mog = nn.get_mog(np.array([[1.]]))

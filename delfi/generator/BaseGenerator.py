@@ -115,15 +115,18 @@ class GeneratorBase(metaclass=ABCMetaDoc):
                     final_stats.append(sum_stats)
                     # if sum stats is accepted, accept the param as well
                     final_params.append(param)
-                    i += 1; pbar.update(1)
+                    i += 1
+                    pbar.update(1)
                 elif response == 'discard':
-                    i += 1; pbar.update(1)
+                    i += 1
+                    pbar.update(1)
                 else:
                     raise ValueError('response not supported')
 
             # TODO: for n_reps > 1 duplicate params; reshape stats array
             params = np.array(final_params)  # n_samples x n_reps x dim theta
-            stats = np.array(final_stats)  # n_samples x n_reps x dim summary stats
+            # n_samples x n_reps x dim summary stats
+            stats = np.array(final_stats)
             stats = stats.squeeze(axis=1)
 
             return params, stats

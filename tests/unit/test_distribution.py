@@ -1,14 +1,16 @@
 import delfi.distribution as dd
 import numpy as np
 
+
 def test_discrete_gen():
     N = 25000
     p = 0.9
-    dist = dd.Discrete(np.array([1-p, p]))
+    dist = dd.Discrete(np.array([1 - p, p]))
     samples = dist.gen(N)
 
     assert samples.shape == (N, 1)
-    assert np.isclose(np.sum(samples)/N, p, atol=0.01)
+    assert np.isclose(np.sum(samples) / N, p, atol=0.01)
+
 
 def test_gaussian_1d():
     N = 50000
@@ -21,7 +23,9 @@ def test_gaussian_1d():
     assert samples.shape == (N, 1)
     assert logprobs.shape == (N,)
     assert np.isclose(np.mean(samples).reshape(-1), m, atol=0.1)
-    assert np.isclose(np.cov(samples, rowvar=False).reshape(-1, 1), S, atol=0.1)
+    assert np.isclose(
+        np.cov(samples, rowvar=False).reshape(-1, 1), S, atol=0.1)
+
 
 def test_gaussian_3d():
     N = 50000
@@ -38,6 +42,7 @@ def test_gaussian_3d():
     assert np.allclose(np.mean(samples, axis=0), m, atol=0.1)
     assert np.allclose(np.cov(samples, rowvar=False), S, atol=0.1)
 
+
 def test_studentst_1d():
     N = 100000
     m = [1.]
@@ -51,7 +56,9 @@ def test_studentst_1d():
     assert samples.shape == (N, 1)
     assert logprobs.shape == (N,)
     assert np.isclose(np.mean(samples).reshape(-1), m, atol=0.1)
-    assert np.isclose(np.cov(samples, rowvar=False).reshape(-1, 1), St, atol=0.1)
+    assert np.isclose(
+        np.cov(samples, rowvar=False).reshape(-1, 1), St, atol=0.1)
+
 
 def test_studentst_3d():
     N = 100000
@@ -70,6 +77,7 @@ def test_studentst_3d():
     assert np.allclose(np.mean(samples, axis=0), m, atol=0.1)
     assert np.allclose(np.cov(samples, rowvar=False), St, atol=0.1)
 
+
 def test_uniform_1d():
     N = 1000
     lower = [1.]
@@ -81,6 +89,7 @@ def test_uniform_1d():
     assert samples.shape == (N, 1)
     assert logprobs.shape == (N,)
 
+
 def test_uniform_2d():
     N = 1000
     lower = [1., 3.]
@@ -91,6 +100,7 @@ def test_uniform_2d():
 
     assert samples.shape == (N, 2)
     assert logprobs.shape == (N,)
+
 
 def test_mixture_of_gaussians_1d():
     N = 1000
@@ -104,6 +114,7 @@ def test_mixture_of_gaussians_1d():
 
     assert samples.shape == (N, 1)
     assert logprobs.shape == (N,)
+
 
 def test_mixture_of_gaussians_3d():
     N = 1000
@@ -120,6 +131,7 @@ def test_mixture_of_gaussians_3d():
     assert samples.shape == (N, 3)
     assert logprobs.shape == (N,)
 
+
 def test_mixture_of_studentst_1d():
     N = 1000
     m = [1.]
@@ -134,6 +146,7 @@ def test_mixture_of_studentst_1d():
 
     assert samples.shape == (N, 1)
     assert logprobs.shape == (N,)
+
 
 def test_mixture_of_studentst_3d():
     N = 1000

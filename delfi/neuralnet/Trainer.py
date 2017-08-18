@@ -54,7 +54,8 @@ class Trainer:
         # prepare train data
         trn_data_vars = [theano.shared(x.astype(dtype)) for x in trn_data]
         n_trn_data_list = set([x.shape[0] for x in trn_data])
-        assert len(n_trn_data_list) == 1, 'Number of train data is not consistent.'
+        assert len(
+            n_trn_data_list) == 1, 'Number of train data is not consistent.'
         self.n_trn_data = list(n_trn_data_list)[0]
 
         # theano function for single batch update
@@ -78,12 +79,15 @@ class Trainer:
         if val_data is not None:
             # prepare validation data
             n_val_data_list = set([x.shape[0] for x in val_data])
-            assert len(n_val_data_list) == 1, 'Number of validation data is not consistent.'
+            assert len(
+                n_val_data_list) == 1, 'Number of validation data is not consistent.'
             self.n_val_data = list(n_val_data_list)[0]
             val_data = [theano.shared(x.astype(dtype)) for x in val_data]
 
             # compile theano function for validation
-            val_inputs = [model.input] if val_target is None else [model.input, val_target]
+            val_inputs = [
+                model.input] if val_target is None else [
+                model.input, val_target]
             self.validate = theano.function(
                 inputs=[],
                 outputs=val_loss,
@@ -153,17 +157,16 @@ class Trainer:
         progress_val_iter = []
         progress_val_val = []
 
-
-
         minibatch = self.n_trn_data if minibatch is None else minibatch
-        monitor_every = float('inf') if monitor_every is None else monitor_every
+        monitor_every = float(
+            'inf') if monitor_every is None else monitor_every
 
         trn_outputs = {}
         for key in self.trn_outputs_names:
             trn_outputs[key] = []
 
         # main training loop
-        with progressbar(total=maxiter*minibatch) as pbar:
+        with progressbar(total=maxiter * minibatch) as pbar:
             for iter in range(maxiter):
                 minibatch_idx = self.idx_stream.gen(minibatch)
                 outputs = self.make_update(minibatch_idx)
@@ -202,13 +205,16 @@ class Trainer:
                 # possible breakpoint
                 if pdb_iter is not None and pdb_iter == iter:
                     mb = np.array(minibatch_idx)
+
                     def get_outputs(outputs, minibatch_idx=mb):
                         fun = theano.function(
-                                    inputs=[self.idx],
-                                    outputs=outputs,
-                                    givens=list(zip(self.trn_inputs, [x[self.idx] for x in self.trn_data])),
-                                    on_unused_input='ignore'
-                                )
+                            inputs=[self.idx],
+                            outputs=outputs,
+                            givens=list(zip(self.trn_inputs,
+                                            [x[self.idx] for x in
+                                             self.trn_data])),
+                            on_unused_input='ignore'
+                        )
                         return fun(minibatch_idx.astype(np.int32))
                     go = get_outputs
                     pdb.set_trace()

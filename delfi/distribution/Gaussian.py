@@ -246,7 +246,7 @@ class Gaussian(DistributionBase):
     def ztrans(self, mean, std):
         """Z-transform"""
         m = self.m - mean
-        S = ( 1./np.outer(std, std) ) * self.S
+        S = (1. / np.outer(std, std)) * self.S
         return Gaussian(m=m, S=S, seed=self.seed)
 
     def ztrans_inv(self, mean, std):

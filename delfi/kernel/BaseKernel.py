@@ -81,7 +81,7 @@ class KernelBase(metaclass=ABCMetaDoc):
         if self.atleast is not None:
             accepted = out > 0.0
             if sum(accepted) / len(accepted) < self.atleast:
-                dists = np.linalg.norm(x-self.obs, axis=1)
+                dists = np.linalg.norm(x - self.obs, axis=1)
                 N = int(np.round(x.shape[0] * self.atleast))
                 idx = np.argsort(dists)[:N]
                 out = np.zeros((x.shape[0],))

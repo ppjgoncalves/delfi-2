@@ -6,6 +6,7 @@ from delfi.summarystats.BaseSummaryStats import SummaryStatsBase
 class Identity(SummaryStatsBase):
     """Just apply the identity instead of reducing data.
     """
+
     def __init__(self, seed=None):
         super().__init__(seed=seed)
 

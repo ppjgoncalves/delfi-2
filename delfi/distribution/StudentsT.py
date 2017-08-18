@@ -41,8 +41,8 @@ class StudentsT(DistributionBase):
     @property
     def std(self):
         """Standard deviations of marginals"""
-        return np.sqrt((self.dof/(self.dof-2)) * \
-               np.diag(self.S)).reshape(-1)
+        return np.sqrt((self.dof / (self.dof - 2)) *
+                       np.diag(self.S)).reshape(-1)
 
     @copy_ancestor_docstring
     def eval(self, x, ii=None, log=True):
@@ -65,5 +65,5 @@ class StudentsT(DistributionBase):
         # See BaseDistribution.py for docstring
         u = np.random.chisquare(self.dof, n_samples) / self.dof
         y = np.random.multivariate_normal(np.zeros(self.ndim),
-            self.S,(n_samples,))
-        return self.m + y/np.sqrt(u)[:,None]
+                                          self.S, (n_samples,))
+        return self.m + y / np.sqrt(u)[:, None]

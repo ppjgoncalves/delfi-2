@@ -15,10 +15,11 @@ class ImputeMissingLayer(lasagne.layers.Layer):
     def get_output_for(self, input, **kwargs):
         input_nan = tt.cast(tt.isnan(input), dtype)
         input_not_nan = tt.cast(tt.invert(tt.isnan(input)), dtype)
-        return input*input_nan + input_not_nan*self.R
+        return input * input_nan + input_not_nan * self.R
 
     def get_output_shape_for(self, input_shape):
         return input_shape
+
 
 class ReplaceMissingLayer(lasagne.layers.Layer):
     def __init__(self, incoming, **kwargs):

@@ -11,9 +11,7 @@
 #
 # You should have received a copy of the CC0 legalcode along with this
 # work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
-
-# import colormaps as cmaps
-# plt.imshow(my_image, cmap=cmaps.viridis)
+from matplotlib.colors import ListedColormap
 
 __all__ = ['magma', 'inferno', 'plasma', 'viridis', 'parula']
 
@@ -1109,8 +1107,6 @@ _parula_data = [[0.2081, 0.1663, 0.5292],
                 [0.9598238095, 0.9218333333, 0.0948380952],
                 [0.9661, 0.9514428571, 0.0755333333],
                 [0.9763, 0.9831, 0.0538]]
-
-from matplotlib.colors import ListedColormap
 
 cmaps = {}
 for (name, data) in (('magma', _magma_data),
