@@ -51,6 +51,6 @@ If you installed by cloning the repository, pull from upstream. Re-execute the i
 Requirements
 ------------
 
-The installation requirements are specified in setup.py. Installing delfi as described above, will automatically take care of the requirements.
+Installing delfi as described above, will automatically take care of the requirements.
 
-Core dependencies are theano and lasagne. For lasagne, delfi relies on the development version of lasagne (0.2dev) rather than the stable version (0.1) that is available through pip.
+The installation requirements are specified in setup.py. Core dependencies are theano and lasagne. For lasagne, delfi relies on the development version of lasagne (0.2dev) rather than the stable version (0.1) that is available through pip.
