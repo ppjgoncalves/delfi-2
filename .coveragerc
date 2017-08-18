@@ -1,2 +1,0 @@
-[run]
-omit=delfi/utils/colormaps.py,delfi/utils/io.py,delfi/utils/viz.py
