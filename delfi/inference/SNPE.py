@@ -96,8 +96,11 @@ class SNPE(InferenceBase):
 
         Parameters
         ----------
-        n_train : int
-            Number of data points drawn per round
+        n_train : int or list of ints
+            Number of data points drawn per round. If a list is passed, the
+            nth list element specifies the number of training examples in the
+            nth round. If there are fewer list elements than rounds, the last
+            list element is used.
         n_rounds : int
             Number of rounds
         epochs : int
@@ -124,9 +127,18 @@ class SNPE(InferenceBase):
         for r in range(n_rounds):
             self.round += 1
 
-            trn_data = self.gen(n_train)  # z-transformed params and stats
+            # number of training examples for this round
+            if type(n_train) == list:
+                try:
+                    n_train_round = n_train[r-1]
+                except:
+                    n_train_round = n_train[-1]
+            else:
+                n_train_round = n_train
 
-            t = Trainer(self.network, self.loss(N=n_train), trn_data,
+            trn_data = self.gen(n_train_round)  # z-transformed params and stats
+
+            t = Trainer(self.network, self.loss(N=n_train_round), trn_data,
                         seed=self.gen_newseed(),
                         monitor=self.monitor_dict_from_names(monitor),
                         **kwargs)
