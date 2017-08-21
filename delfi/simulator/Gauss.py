@@ -25,7 +25,7 @@ class Gauss(SimulatorBase):
 
     @copy_ancestor_docstring
     def gen_single(self, param):
-        # See Simulator.py for docstring
+        # See BaseSimulator for docstring
         param = np.asarray(param).reshape(-1)
         assert param.ndim == 1
         assert param.shape[0] == self.dim_param
