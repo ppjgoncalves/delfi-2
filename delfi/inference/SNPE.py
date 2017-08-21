@@ -146,10 +146,12 @@ class SNPE(InferenceBase):
             trn_datasets.append(trn_data)
 
             # posterior becomes new proposal prior
-            self.generator.proposal = self.predict(self.obs)  # see super
+            proposal = self.predict(self.obs)  # see super
 
             # convert proposal to student's T?
-            if self.convert_to_T:
-                self.generator.proposal = self.generator.proposal.convert_to_T()
+            if self.convert_to_T is not None or 0:
+                proposal = proposal.convert_to_T(dofs=10)
+
+            self.generator.proposal = proposal
 
         return logs, trn_datasets
