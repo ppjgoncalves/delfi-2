@@ -196,7 +196,13 @@ class Gaussian(DistributionBase):
         return res
 
     def convert_to_T(self, dof):
-        """Converts Gaussian to Student T"""
+        """Converts Gaussian to Student T
+
+        Parameters
+        ----------
+        dof : int
+            Degrees of freedom
+        """
         return StudentsT(self.m, self.S, dof, seed=self.seed)
 
     @copy_ancestor_docstring

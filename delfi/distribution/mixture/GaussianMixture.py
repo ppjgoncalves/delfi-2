@@ -161,7 +161,15 @@ class MoG(MixtureBase):
         return m, S
 
     def convert_to_T(self, dofs):
-        """Convert to Mixture of Student's T distributions"""
+        """Convert to Mixture of Student's T distributions
+
+        Parameters
+        ----------
+        dofs : int or list of ints
+            Degrees of freedom of component distributions
+        """
+        if type(dofs) == int:
+            dofs = [dofs for i in range(len(self.xs))]
         ys = [x.convert_to_T(dof) for x, dof in zip(self.xs, dofs)]
         return MoT(self.a, xs=ys, seed=self.seed)
 
