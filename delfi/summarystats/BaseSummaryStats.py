@@ -9,7 +9,9 @@ class SummaryStatsBase(metaclass=ABCMetaDoc):
         """Abstract base class for summary stats
 
         Summary Stats must at least implement abstract methods and properties of
-        this class.
+        this class: The method ``calc()`` needs to be implemented. The attribute
+        ``n_summary`` can be useful to have, for example to write tests, but it
+        is not strictly required.
 
         Parameters
         ----------
