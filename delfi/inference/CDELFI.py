@@ -75,8 +75,11 @@ class CDELFI(InferenceBase):
 
         Parameters
         ----------
-        n_train : int
-            Number of data points drawn per round
+        n_train : int or list of ints
+            Number of data points drawn per round. If a list is passed, the
+            nth list element specifies the number of training examples in the
+            nth round. If there are fewer list elements than rounds, the last
+            list element is used.
         n_rounds : int
             Number of rounds
         epochs: int
@@ -101,7 +104,16 @@ class CDELFI(InferenceBase):
         trn_datasets = []
 
         for r in range(1, n_rounds + 1):  # start at 1
-            trn_data = self.gen(n_train)  # z-transformed params and stats
+            # number of training examples for this round
+            if type(n_train) == list:
+                try:
+                    n_train_round = n_train[r-1]
+                except:
+                    n_train_round = n_train[-1]
+            else:
+                n_train_round = n_train
+
+            trn_data = self.gen(n_train_round)  # z-transformed params and stats
 
             # algorithm 2 of Papamakarios and Murray
             if r == n_rounds and self.n_components > 1:
@@ -121,7 +133,7 @@ class CDELFI(InferenceBase):
                     new_params[p] = old_params[p[:-1] + '0']
                 self.network.params_dict = new_params
 
-            t = Trainer(self.network, self.loss(N=n_train), trn_data,
+            t = Trainer(self.network, self.loss(N=n_train_round), trn_data,
                         monitor=self.monitor_dict_from_names(monitor),
                         seed=self.gen_newseed(), **kwargs)
 
