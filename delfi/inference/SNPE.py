@@ -89,7 +89,7 @@ class SNPE(InferenceBase):
 
         return loss
 
-    def run(self, n_train=100, n_rounds=2, epochs=1000, minibatch=50,
+    def run(self, n_train=100, n_rounds=2, epochs=100, minibatch=50,
             monitor=None, **kwargs):
         """Run algorithm
 

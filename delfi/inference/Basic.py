@@ -56,7 +56,7 @@ class Basic(InferenceBase):
 
         return loss
 
-    def run(self, n_train=100, epochs=1000, minibatch=50, monitor=None,
+    def run(self, n_train=100, epochs=100, minibatch=50, monitor=None,
             **kwargs):
         """Run algorithm
 
