@@ -64,8 +64,8 @@ class CDELFI(InferenceBase):
                              self.reg_lambda)
             loss = loss + 1 / N * kl
 
-        # adding nodes to dict s.t. they can be monitored during training
-        self.observables['loss.kl'] = kl
+            # adding nodes to dict s.t. they can be monitored
+            self.observables['loss.kl'] = kl
 
         return loss
 

@@ -68,6 +68,11 @@ class SNPE(InferenceBase):
 
         loss = -tt.mean(iws * self.network.lprobs)
 
+        # adding nodes to dict s.t. they can be monitored during training
+        self.observables['loss.iws'] = iws
+        self.observables['loss.prior'] = prior_eval
+        self.observables['loss.proposal'] = proposal_eval
+
         if self.svi:
             if self.round == 1:
                 # keep weights close to zero-centered prior (first round)
@@ -80,11 +85,7 @@ class SNPE(InferenceBase):
 
             loss = loss + 1 / N * kl
 
-        # adding nodes to dict s.t. they can be monitored during training
-        self.observables['loss.iws'] = iws
-        self.observables['loss.prior'] = prior_eval
-        self.observables['loss.proposal'] = proposal_eval
-        self.observables['loss.kl'] = kl
+            self.observables['loss.kl'] = kl
 
         return loss
 
