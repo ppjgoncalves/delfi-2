@@ -44,6 +44,7 @@ class SNPE(InferenceBase):
         self.obs = obs
         self.reg_lambda = reg_lambda
         self.round = 0
+        self.convert_to_T = convert_to_T
 
     def loss(self, N):
         """Loss function for training
@@ -134,5 +135,9 @@ class SNPE(InferenceBase):
 
             # posterior becomes new proposal prior
             self.generator.proposal = self.predict(self.obs)  # see super
+
+            # convert proposal to student's T?
+            if self.convert_to_T:
+                self.generator.proposal = self.generator.proposal.convert_to_T()
 
         return logs, trn_datasets
