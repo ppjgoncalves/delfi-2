@@ -1,10 +1,10 @@
 ``kernel`` – Kernel functions
 -----------------------------
 
-Inference algorithms may utilize kernels as part of the loss function. 
+Inference algorithms may utilize kernels as part of the loss function.
 
 Epanechnikov
-```````
+````````````
 .. autoclass:: delfi.kernel.Epanechnikov
   :show-inheritance:
   :inherited-members:

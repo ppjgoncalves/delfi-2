@@ -1,13 +1,13 @@
 API Documentation
 =================
 
-.. include:: api/inference.rst
-.. include:: api/generator.rst
-.. include:: api/distribution.rst
-.. include:: api/mixtures.rst
-.. include:: api/simulator.rst
-.. include:: api/summarystats.rst
-.. include:: api/neuralnet.rst
-.. include:: api/layers.rst
-.. include:: api/kernel.rst
-.. include:: api/utils.rst
+.. include:: api/inference.inc
+.. include:: api/generator.inc
+.. include:: api/distribution.inc
+.. include:: api/mixtures.inc
+.. include:: api/simulator.inc
+.. include:: api/summarystats.inc
+.. include:: api/neuralnet.inc
+.. include:: api/layers.inc
+.. include:: api/kernel.inc
+.. include:: api/utils.inc
