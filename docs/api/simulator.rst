@@ -14,3 +14,10 @@ Gauss
   :show-inheritance:
   :inherited-members:
   :members:
+
+Gaussian Mixture
+````````````````
+.. autoclass:: delfi.simulator.GaussMixture
+  :show-inheritance:
+  :inherited-members:
+  :members:

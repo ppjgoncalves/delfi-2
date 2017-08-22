@@ -13,7 +13,6 @@ Identity
   :inherited-members:
   :members:
 
-
 Mean
 ````
 .. autoclass:: delfi.summarystats.Mean
