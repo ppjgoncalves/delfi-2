@@ -1,9 +1,9 @@
 import numpy as np
 
-from delfi.kernel.BaseKernel import KernelBase
+from delfi.kernel.BaseKernel import BaseKernel
 
 
-class Tricube(KernelBase):
+class Tricube(BaseKernel):
     @staticmethod
     def kernel(u):
         if np.abs(u) <= 1:

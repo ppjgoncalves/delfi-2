@@ -6,7 +6,7 @@ from delfi.utils.progress import no_tqdm
 from tqdm import tqdm
 
 
-class GeneratorBase(metaclass=ABCMetaDoc):
+class BaseGenerator(metaclass=ABCMetaDoc):
     def __init__(self, model, prior, summary):
         """Generator
 

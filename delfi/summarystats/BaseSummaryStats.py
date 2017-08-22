@@ -4,7 +4,7 @@ import numpy as np
 from delfi.utils.meta import ABCMetaDoc
 
 
-class SummaryStatsBase(metaclass=ABCMetaDoc):
+class BaseSummaryStats(metaclass=ABCMetaDoc):
     def __init__(self, seed=None):
         """Abstract base class for summary stats
 

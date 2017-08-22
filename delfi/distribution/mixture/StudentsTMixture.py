@@ -4,10 +4,10 @@ import scipy.misc
 import scipy.stats
 
 from delfi.distribution.StudentsT import StudentsT
-from delfi.distribution.mixture.BaseMixture import MixtureBase
+from delfi.distribution.mixture.BaseMixture import BaseMixture
 
 
-class MoT(MixtureBase):
+class MoT(BaseMixture):
     def __init__(self, a, ms=None, Ss=None, dofs=None, xs=None, seed=None):
         """Mixture of Student's T distributions
 

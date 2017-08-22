@@ -4,7 +4,7 @@ import numpy as np
 from delfi.utils.meta import ABCMetaDoc
 
 
-class KernelBase(metaclass=ABCMetaDoc):
+class BaseKernel(metaclass=ABCMetaDoc):
     def __init__(self, obs, bandwidth=1., spherical=True, atleast=None):
         """Abstract base class for kernels
 

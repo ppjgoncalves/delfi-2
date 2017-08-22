@@ -1,9 +1,9 @@
 import numpy as np
 
-from delfi.distribution.BaseDistribution import DistributionBase
+from delfi.distribution.BaseDistribution import BaseDistribution
 
 
-class Uniform(DistributionBase):
+class Uniform(BaseDistribution):
     def __init__(self, lower=0., upper=1., seed=None):
         """Uniform distribution
 

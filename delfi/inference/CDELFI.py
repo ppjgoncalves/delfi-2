@@ -2,13 +2,13 @@ import delfi.distribution as dd
 import numpy as np
 import theano.tensor as tt
 
-from delfi.inference.BaseInference import InferenceBase
+from delfi.inference.BaseInference import BaseInference
 from delfi.neuralnet.NeuralNet import NeuralNet
 from delfi.neuralnet.Trainer import Trainer
 from delfi.neuralnet.loss.regularizer import svi_kl_zero
 
 
-class CDELFI(InferenceBase):
+class CDELFI(BaseInference):
     def __init__(self, generator, obs, n_components=1, reg_lambda=100.,
                  seed=None, **kwargs):
         """Conditional density estimation likelihood-free inference (CDE-LFI)

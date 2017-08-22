@@ -6,7 +6,7 @@ from delfi.neuralnet.Trainer import Trainer
 from delfi.utils.meta import ABCMetaDoc
 
 
-class InferenceBase(metaclass=ABCMetaDoc):
+class BaseInference(metaclass=ABCMetaDoc):
     """Abstract base class for inference algorithms
 
     Inference algorithms must at least implement abstract methods of this class.

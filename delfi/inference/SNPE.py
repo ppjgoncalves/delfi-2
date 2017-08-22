@@ -2,7 +2,7 @@ import numpy as np
 import theano
 import theano.tensor as tt
 
-from delfi.inference.BaseInference import InferenceBase
+from delfi.inference.BaseInference import BaseInference
 from delfi.neuralnet.Trainer import Trainer
 from delfi.neuralnet.loss.ops import distribution_pyop, kernel_pyop
 from delfi.neuralnet.loss.regularizer import svi_kl_init, svi_kl_zero
@@ -10,7 +10,7 @@ from delfi.neuralnet.loss.regularizer import svi_kl_init, svi_kl_zero
 dtype = theano.config.floatX
 
 
-class SNPE(InferenceBase):
+class SNPE(BaseInference):
     def __init__(self, generator, obs, convert_to_T=False, reg_lambda=100.,
                  seed=None, **kwargs):
         """Sequential neural posterior estimation (SNPE)

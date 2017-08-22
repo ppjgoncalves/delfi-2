@@ -1,9 +1,9 @@
 import numpy as np
 
-from delfi.kernel.BaseKernel import KernelBase
+from delfi.kernel.BaseKernel import BaseKernel
 
 
-class Uniform(KernelBase):
+class Uniform(BaseKernel):
     @staticmethod
     def kernel(u):
         if np.abs(u) <= 1:

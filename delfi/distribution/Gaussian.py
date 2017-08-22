@@ -1,11 +1,11 @@
 import numpy as np
 import scipy.stats
 
-from delfi.distribution.BaseDistribution import DistributionBase
+from delfi.distribution.BaseDistribution import BaseDistribution
 from delfi.distribution.StudentsT import StudentsT
 
 
-class Gaussian(DistributionBase):
+class Gaussian(BaseDistribution):
     def __init__(self, m=None, P=None, U=None, S=None, Pm=None, seed=None):
         """Gaussian distribution
 

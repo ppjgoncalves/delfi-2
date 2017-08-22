@@ -1,10 +1,10 @@
 import delfi.distribution as dd
 import numpy as np
 
-from delfi.simulator.BaseSimulator import SimulatorBase
+from delfi.simulator.BaseSimulator import BaseSimulator
 
 
-class Gauss(SimulatorBase):
+class Gauss(BaseSimulator):
     def __init__(self, dim=1, noise_cov=0.1, seed=None):
         """Gauss simulator
 

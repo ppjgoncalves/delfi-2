@@ -1,9 +1,9 @@
 import numpy as np
 
-from delfi.summarystats.BaseSummaryStats import SummaryStatsBase
+from delfi.summarystats.BaseSummaryStats import BaseSummaryStats
 
 
-class Identity(SummaryStatsBase):
+class Identity(BaseSummaryStats):
     """Just apply the identity instead of reducing data.
     """
 

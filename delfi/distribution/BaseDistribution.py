@@ -4,7 +4,7 @@ import numpy as np
 from delfi.utils.meta import ABCMetaDoc
 
 
-class DistributionBase(metaclass=ABCMetaDoc):
+class BaseDistribution(metaclass=ABCMetaDoc):
     """Abstract base class for distributions
 
     Distributions must at least implement abstract properties and methods of

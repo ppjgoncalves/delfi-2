@@ -1,9 +1,9 @@
 import numpy as np
 
-from delfi.summarystats.BaseSummaryStats import SummaryStatsBase
+from delfi.summarystats.BaseSummaryStats import BaseSummaryStats
 
 
-class Mean(SummaryStatsBase):
+class Mean(BaseSummaryStats):
     """Reduces data to mean
     """
 

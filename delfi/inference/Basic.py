@@ -1,11 +1,11 @@
 import theano.tensor as tt
 
-from delfi.inference.BaseInference import InferenceBase
+from delfi.inference.BaseInference import BaseInference
 from delfi.neuralnet.Trainer import Trainer
 from delfi.neuralnet.loss.regularizer import svi_kl_zero
 
 
-class Basic(InferenceBase):
+class Basic(BaseInference):
     def __init__(self, generator, reg_lambda=100., seed=None, **kwargs):
         """Basic inference algorithm
 

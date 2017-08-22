@@ -3,11 +3,11 @@ import scipy.misc
 import scipy.stats
 
 from delfi.distribution.Gaussian import Gaussian
-from delfi.distribution.mixture.BaseMixture import MixtureBase
+from delfi.distribution.mixture.BaseMixture import BaseMixture
 from delfi.distribution.mixture.StudentsTMixture import MoT
 
 
-class MoG(MixtureBase):
+class MoG(BaseMixture):
     def __init__(
             self,
             a,

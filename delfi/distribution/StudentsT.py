@@ -1,10 +1,10 @@
 import numpy as np
 import scipy.special
 
-from delfi.distribution.BaseDistribution import DistributionBase
+from delfi.distribution.BaseDistribution import BaseDistribution
 
 
-class StudentsT(DistributionBase):
+class StudentsT(BaseDistribution):
     def __init__(self, m, S, dof, seed=None):
         """Student's T distribution
 

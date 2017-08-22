@@ -4,7 +4,7 @@ import numpy as np
 from delfi.utils.meta import ABCMetaDoc
 
 
-class SimulatorBase(metaclass=ABCMetaDoc):
+class BaseSimulator(metaclass=ABCMetaDoc):
     def __init__(self, dim_param, seed=None):
         """Abstract base class for simulator models
 

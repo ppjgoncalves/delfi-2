@@ -5,7 +5,7 @@ from delfi.distribution.Discrete import Discrete
 from delfi.utils.meta import ABCMetaDoc
 
 
-class MixtureBase(metaclass=ABCMetaDoc):
+class BaseMixture(metaclass=ABCMetaDoc):
     """Abstract base class for mixture distributions
 
     Distributions must at least implement abstract methods of this class.

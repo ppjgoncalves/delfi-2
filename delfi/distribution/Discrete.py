@@ -1,9 +1,9 @@
 import numpy as np
 
-from delfi.distribution.BaseDistribution import DistributionBase
+from delfi.distribution.BaseDistribution import BaseDistribution
 
 
-class Discrete(DistributionBase):
+class Discrete(BaseDistribution):
     def __init__(self, p, seed=None):
         """Discrete distribution
 

@@ -74,13 +74,16 @@ class NeuralNet(object):
 
         # mixture layers
         self.layer['mixture_weights'] = dl.MixtureWeightsLayer(
-            last_hidden, n_units=n_components, actfun=lnl.softmax, svi=svi, name='weights')
+            last_hidden, n_units=n_components, actfun=lnl.softmax, svi=svi,
+            name='weights')
         self.layer['mixture_means'] = dl.MixtureMeansLayer(
-            last_hidden, n_components=n_components, n_dim=n_outputs, svi=svi, name='means')
+            last_hidden, n_components=n_components, n_dim=n_outputs, svi=svi,
+            name='means')
         self.layer['mixture_precisions'] = dl.MixturePrecisionsLayer(
             last_hidden, n_components=n_components, n_dim=n_outputs, svi=svi,
             name='precisions')
-        last_mog = [self.layer['mixture_weights'], self.layer['mixture_means'],
+        last_mog = [self.layer['mixture_weights'],
+                    self.layer['mixture_means'],
                     self.layer['mixture_precisions']]
 
         # mixture parameters
