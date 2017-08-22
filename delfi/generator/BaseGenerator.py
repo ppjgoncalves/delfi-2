@@ -2,7 +2,7 @@ import abc
 import numpy as np
 
 from delfi.utils.meta import ABCMetaDoc
-from delfi.utils.progress import no_tqdm
+from delfi.utils.progress import no_tqdm, progressbar
 from tqdm import tqdm
 
 
@@ -42,8 +42,9 @@ class BaseGenerator(metaclass=ABCMetaDoc):
             Number of repetitions per parameter sample, useful for stochastic simulations
         skip_feedback: bool
             If True, feedback checks on params, data and sum stats are skipped
-        verbose : bool
-            If True, will print info and display progress bars
+        verbose : bool or str
+            If False, will not display progress bars. If a string is passed,
+            the string will be set as a description for the progress bar.
 
         Returns
         -------
@@ -54,14 +55,14 @@ class BaseGenerator(metaclass=ABCMetaDoc):
         """
         assert n_reps == 1, 'n_reps > 1 is not yet supported'
 
-        if verbose:
-            progressbar = tqdm(total=n_samples)
-            info = {}
-            print('Drawing parameters and running the forward model')
+        if verbose == False:
+            pbar = no_tqdm()
         else:
-            progressbar = no_tqdm()
+            pbar = progressbar(total=n_samples)
+            if type(verbose) == str:
+                pbar.set_description(verbose + ' ')
 
-        with progressbar as pbar:
+        with pbar:
 
             # collect valid parameter vectors from the prior
             params = []  # list of parameter vectors

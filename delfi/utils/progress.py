@@ -11,6 +11,9 @@ class no_tqdm(object):
     def __exit__(self, type, value, traceback):
         pass
 
+    def update(self, i):
+        pass
+
 
 def progressbar(*args, **kwargs):
     """Creates a tqdm instance for a notebook or command line

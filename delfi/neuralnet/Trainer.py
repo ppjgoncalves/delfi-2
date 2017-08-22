@@ -6,7 +6,6 @@ import theano
 import theano.tensor as tt
 
 from delfi.utils.progress import progressbar
-from lasagne.utils import compute_norms
 
 dtype = theano.config.floatX
 
@@ -71,7 +70,7 @@ class Trainer:
         self.make_update = theano.function(
             inputs=[idx],
             outputs=self.trn_outputs_nodes,
-            givens=list(zip(trn_inputs, trn_inputs_data)),
+            givens=list(zip(trn_inputs, trn_inputs_data)),  # (x,y), (p[i],s[i])
             updates=self.updates
         )
 
@@ -167,6 +166,8 @@ class Trainer:
 
         # main training loop
         with progressbar(total=maxiter * minibatch) as pbar:
+            pbar.set_description('Training ')
+
             for iter in range(maxiter):
                 minibatch_idx = self.idx_stream.gen(minibatch)
                 outputs = self.make_update(minibatch_idx)
