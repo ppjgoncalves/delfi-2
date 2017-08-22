@@ -43,10 +43,10 @@ class FullyConnectedLayer(lasagne.layers.Layer):
 
         self.mW = self.add_param(mW_init,
                                  (self.input_shape[1], self.n_units),
-                                 name='mW', mp=True)
+                                 name='mW', mp=True, wp=True)
         self.mb = self.add_param(mb_init,
                                  (self.n_units,),
-                                 name='mb', mp=True)
+                                 name='mb', mp=True, bp=True)
 
         if self.svi:
             self._srng = RandomStreams(
@@ -54,10 +54,10 @@ class FullyConnectedLayer(lasagne.layers.Layer):
                     1, 2147462579))
             self.sW = self.add_param(sW_init,
                                      (self.input_shape[1], self.n_units),
-                                     name='sW', sp=True)
+                                     name='sW', sp=True, wp=True)
             self.sb = self.add_param(sb_init,
                                      (self.n_units,),
-                                     name='sb', sp=True)
+                                     name='sb', sp=True, bp=True)
 
     def get_output_for(self, input, deterministic=False, **kwargs):
         """Returns matrix with shape (batch, n_units)"""

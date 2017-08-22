@@ -20,14 +20,12 @@ class MixtureWeightsLayer(FullyConnectedLayer):
         If n_units > 1, this becomes a fully-connected layer. Else, no
         parameters are added, and the output defaults to weight 1.
 
-        See FullyConnected.py for docstring
+        See ``delfi.neuralnet.layers.FullyConnected`` for docstring
         """
         self.n_units = n_units
 
         if n_units > 1:
-            super(
-                MixtureWeightsLayer,
-                self).__init__(
+            super(MixtureWeightsLayer, self).__init__(
                 incoming,
                 n_units,
                 svi=svi,
@@ -44,9 +42,7 @@ class MixtureWeightsLayer(FullyConnectedLayer):
     def get_output_for(self, input, deterministic=False, **kwargs):
         """Returns matrix with shape (batch, n_units)"""
         if self.n_units > 1:
-            return super(
-                MixtureWeightsLayer,
-                self).get_output_for(
+            return super(MixtureWeightsLayer, self).get_output_for(
                 input,
                 deterministic=deterministic,
                 **kwargs)

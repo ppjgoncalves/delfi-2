@@ -53,11 +53,11 @@ class MixtureMeansLayer(lasagne.layers.Layer):
 
         self.mWs = [self.add_param(mWs_init,
                                    (self.input_shape[1], self.n_dim),
-                                   name='mW' + str(c), mp=True)
+                                   name='mW' + str(c), mp=True, wp=True)
                     for c in range(n_components)]
         self.mbs = [self.add_param(mbs_init,
                                    (self.n_dim,),
-                                   name='mb' + str(c), mp=True)
+                                   name='mb' + str(c), mp=True, bp=True)
                     for c in range(n_components)]
 
         if self.svi:
@@ -66,11 +66,11 @@ class MixtureMeansLayer(lasagne.layers.Layer):
                     1, 2147462579))
             self.sWs = [self.add_param(sWs_init,
                                        (self.input_shape[1], self.n_dim),
-                                       name='sW' + str(c), sp=True)
+                                       name='sW' + str(c), sp=True, wp=True)
                         for c in range(n_components)]
             self.sbs = [self.add_param(sbs_init,
                                        (self.n_dim,),
-                                       name='sb' + str(c), sp=True)
+                                       name='sb' + str(c), sp=True, bp=True)
                         for c in range(n_components)]
 
     def get_output_for(self, input, deterministic=False, **kwargs):
