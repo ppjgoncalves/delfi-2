@@ -2,10 +2,7 @@
 ------------------------------------
 
 Inference algorithms are implemented in the inference submodule. At the moment,
-the following algorithms are implemented:
-- ``Basic``
-- ``SNPE``
-- ``CDE-LFI``
+the following algorithms are implemented: 
 
 Basic
 `````
