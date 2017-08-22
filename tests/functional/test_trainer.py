@@ -20,8 +20,6 @@ def test_trainer_updates():
     s = ds.Identity()
     g = dg.Default(model=m, prior=p, summary=s)
 
-    trn_data = g.gen(100)
-
     nn = NeuralNet(
         n_components=n_components,
         n_hiddens=[10],
@@ -31,7 +29,10 @@ def test_trainer_updates():
         svi=svi)
     loss = -tt.mean(nn.lprobs)
 
-    t = Trainer(network=nn, loss=loss, trn_data=trn_data)
+    trn_data = g.gen(100)  # params, stats
+    trn_inputs = [nn.params, nn.stats]
+
+    t = Trainer(network=nn, loss=loss, trn_data=trn_data, trn_inputs=trn_inputs)
 
     # single update
     minibatch_idx = t.idx_stream.gen(10)

@@ -11,7 +11,7 @@ dtype = theano.config.floatX
 
 
 class Trainer:
-    def __init__(self, network, loss, trn_data,
+    def __init__(self, network, loss, trn_data, trn_inputs,
                  step=lu.adam, max_norm=0.1, monitor=None, seed=None):
         """Construct and configure the trainer
 
@@ -25,8 +25,10 @@ class Trainer:
             The neural network to train
         loss : theano variable
             Loss function to be computed for network training
-        trn_data : array
+        trn_data : tuple of arrays
             Training data in the form (params, stats)
+        trn_inputs : list of theano variables
+            Theano variables that should contain the the training data
         step : function
             Function to call for updates, will pass gradients and parameters
         max_norm : float
@@ -41,30 +43,33 @@ class Trainer:
         self.loss = loss
 
         # gradients
-        grads = tt.grad(self.loss, self.network.params)
+        grads = tt.grad(self.loss, self.network.aps)
         if max_norm is not None:
             grads = lu.total_norm_constraint(grads, max_norm=max_norm)
 
         # updates
-        self.updates = step(grads, self.network.params)
+        self.updates = step(grads, self.network.aps)
 
         # prepare train data
         trn_data_vars = [theano.shared(x.astype(dtype)) for x in trn_data]
         n_trn_data_list = set([x.shape[0] for x in trn_data])
-        assert len(
-            n_trn_data_list) == 1, 'Number of train data is not consistent.'
+        assert len(n_trn_data_list) == 1, 'trn_data elements got different len'
         self.n_trn_data = list(n_trn_data_list)[0]
 
-        # theano function for single batch update
+        # train data indexed for minibatches
         idx = tt.ivector('idx')
-        trn_inputs = [self.network.y] + [self.network.x]  # trn_data is (params, stats)
+        self.idx_stream = ds.IndexSubSampler(self.n_trn_data, seed=seed)
         trn_inputs_data = [x[idx] for x in trn_data_vars]
+
+        # outputs
         self.trn_outputs_names = ['loss']
         self.trn_outputs_nodes = [self.loss]
         if monitor is not None:
             monitor_names, monitor_nodes = zip(*monitor.items())
             self.trn_outputs_names += monitor_names
             self.trn_outputs_nodes += monitor_nodes
+
+        # function for single update
         self.make_update = theano.function(
             inputs=[idx],
             outputs=self.trn_outputs_nodes,
@@ -76,11 +81,8 @@ class Trainer:
         self.loss = float('inf')
 
         # pointers to model from self for better debugging
-        self.idx = idx
         self.trn_inputs = trn_inputs
         self.trn_data = trn_data
-
-        self.idx_stream = ds.IndexSubSampler(self.n_trn_data, seed=seed)
 
     def train(self,
               epochs=100,

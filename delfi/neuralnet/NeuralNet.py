@@ -50,17 +50,17 @@ class NeuralNet(object):
         lasagne.random.set_rng(self.rng)
 
         # placeholders
-        # x : input placeholder, (batch, self.n_inputs)
-        # y : output placeholder, (batch, self.n_outputs)
-        self.x = tt.matrix('x', dtype=dtype)
-        self.y = tt.matrix('y', dtype=dtype)
+        # stats : input placeholder, (batch, self.n_inputs)
+        # params : output placeholder, (batch, self.n_outputs)
+        self.stats = tt.matrix('stats', dtype=dtype)
+        self.params = tt.matrix('params', dtype=dtype)
 
         # compose layers
         self.layer = collections.OrderedDict()
 
         # input layer
         self.layer['input'] = ll.InputLayer(
-            (None, self.n_inputs), input_var=self.x)
+            (None, self.n_inputs), input_var=self.stats)
         # ... or substitute NaN for zero
         # ... or learn replacement values
         # ... or a recurrent neural net
@@ -105,7 +105,7 @@ class NeuralNet(object):
         # log probability of y given the mixture distribution
         # lprobs_comps : log probs per component, list of len n_components with (batch, )
         # probs : log probs of mixture, (batch, )
-        self.lprobs_comps = [-0.5 * tt.sum(tt.sum((self.y - m).dimshuffle(
+        self.lprobs_comps = [-0.5 * tt.sum(tt.sum((self.params - m).dimshuffle(
             [0, 'x', 1]) * U, axis=2)**2, axis=1) + ldetU
             for m, U, ldetU in zip(self.ms, self.Us, self.ldetUs)]
         self.lprobs = tt.log(tt.sum(tt.exp(tt.stack(self.lprobs_comps,
@@ -123,17 +123,17 @@ class NeuralNet(object):
             **{'a': self.da},
             **{'m' + str(i): self.dms[i] for i in range(self.n_components)},
             **{'U' + str(i): self.dUs[i] for i in range(self.n_components)}}
-        self.dlprobs_comps = [-0.5 * tt.sum(tt.sum((self.y - m).dimshuffle(
+        self.dlprobs_comps = [-0.5 * tt.sum(tt.sum((self.params - m).dimshuffle(
             [0, 'x', 1]) * U, axis=2)**2, axis=1) + ldetU
             for m, U, ldetU in zip(self.dms, self.dUs, self.dldetUs)]
         self.dlprobs = tt.log(tt.sum(tt.exp(tt.stack(self.dlprobs_comps,
                                                      axis=1) + tt.log(self.da)),
                                      axis=1)) - (0.5 * self.n_outputs * np.log(2 * np.pi))
 
-        # all parameters of network
-        self.params = ll.get_all_params(last_mog)
-        self.mps = ll.get_all_params(last_mog, mp=True)
-        self.sps = ll.get_all_params(last_mog, sp=True)
+        # parameters of network
+        self.aps = ll.get_all_params(last_mog)  # all parameters
+        self.mps = ll.get_all_params(last_mog, mp=True)  # means
+        self.sps = ll.get_all_params(last_mog, sp=True)  # log stds
 
         # theano functions
         self.compile_funs()
@@ -141,54 +141,53 @@ class NeuralNet(object):
     def compile_funs(self):
         """Compiles theano functions"""
         self._f_eval_comps = theano.function(
-            inputs=[self.x],
+            inputs=[self.stats],
             outputs=self.dcomps)
         self._f_eval_lprobs = theano.function(
-            inputs=[self.x, self.y],
+            inputs=[self.params, self.stats],
             outputs=self.dlprobs)
 
-    def eval_comps(self, x):
+    def eval_comps(self, stats):
         """Evaluate the parameters of all mixture components at given inputs
 
         Parameters
         ----------
-        x : np.array
+        stats : np.array
             rows are input locations
 
         Returns
         -------
         mixing coefficients, means and scale matrices
         """
-        return self._f_eval_comps(x.astype(dtype))
+        return self._f_eval_comps(stats.astype(dtype))
 
-    def eval_lprobs(self, xy):
+    def eval_lprobs(self, params, stats):
         """Evaluate log probabilities for given input-output pairs.
 
         Parameters
         ----------
-        xy : np.array
-            a pair (x, y) where x rows are inputs and y rows are outputs
+        params : np.array
+        stats : np.array
 
         Returns
         -------
-        log probabilities : log p(y|x)
+        log probabilities : log p(params|stats)
         """
-        x, y = xy
-        return self._f_eval_lprobs(x.astype(dtype), y.astype(dtype))
+        return self._f_eval_lprobs(params.astype(dtype), stats.astype(dtype))
 
-    def get_mog(self, x, n_samples=None):
+    def get_mog(self, stats, n_samples=None):
         """Return the conditional MoG at location x
 
         Parameters
         ----------
-        x : np.array
+        stats : np.array
             single input location
         n_samples : None or int
             ...
         """
-        assert x.shape[0] == 1, 'x.shape[0] needs to be 1'
+        assert stats.shape[0] == 1, 'x.shape[0] needs to be 1'
 
-        comps = self.eval_comps(x)
+        comps = self.eval_comps(stats)
         a = comps['a'][0]
         ms = [comps['m' + str(i)][0] for i in range(self.n_components)]
         Us = [comps['U' + str(i)][0] for i in range(self.n_components)]
@@ -206,14 +205,14 @@ class NeuralNet(object):
     def params_dict(self):
         """Getter for params as dict"""
         pdict = {}
-        for p in self.params:
+        for p in self.aps:
             pdict[str(p)] = p.get_value()
         return pdict
 
     @params_dict.setter
     def params_dict(self, pdict):
         """Setter for params as dict"""
-        for p in self.params:
+        for p in self.aps:
             if str(p) in pdict.keys():
                 p.set_value(pdict[str(p)])
 

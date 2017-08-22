@@ -14,7 +14,7 @@ def test_lprobs():
     nn = NeuralNet(n_components=n_components, n_hiddens=[10], n_inputs=1,
                    n_outputs=1, seed=seed, svi=svi)
 
-    eval_lprobs = theano.function([nn.x, nn.y], nn.lprobs)
+    eval_lprobs = theano.function([nn.params, nn.stats], nn.lprobs)
 
     res = eval_lprobs(np.array([[1.], [2.]], dtype=dtype),
                       np.array([[1.], [2.]], dtype=dtype))

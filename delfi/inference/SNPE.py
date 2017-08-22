@@ -58,7 +58,7 @@ class SNPE(BaseInference):
         if self.generator.proposal is not None:
             prior = distribution_pyop(self.generator.prior)
             proposal = distribution_pyop(self.generator.proposal)
-            y_zt = tt.constant(self.params_std, dtype=dtype) * self.network.y \
+            y_zt = tt.constant(self.params_std, dtype=dtype) * self.network.params \
                 + tt.constant(self.params_mean, dtype=dtype)
             prior_eval = prior(y_zt)
             proposal_eval = proposal(y_zt)
@@ -137,8 +137,10 @@ class SNPE(BaseInference):
                 n_train_round = n_train
 
             trn_data = self.gen(n_train_round)  # z-transformed params and stats
+            trn_inputs = [self.network.params, self.network.stats]
 
-            t = Trainer(self.network, self.loss(N=n_train_round), trn_data,
+            t = Trainer(self.network, self.loss(N=n_train_round),
+                        trn_data=trn_data, trn_inputs=trn_inputs,
                         seed=self.gen_newseed(),
                         monitor=self.monitor_dict_from_names(monitor),
                         **kwargs)

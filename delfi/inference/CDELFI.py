@@ -114,6 +114,7 @@ class CDELFI(BaseInference):
                 n_train_round = n_train
 
             trn_data = self.gen(n_train_round)  # z-transformed params and stats
+            trn_inputs = [self.network.params, self.network.stats]
 
             # algorithm 2 of Papamakarios and Murray
             if r == n_rounds and self.n_components > 1:
@@ -133,7 +134,8 @@ class CDELFI(BaseInference):
                     new_params[p] = old_params[p[:-1] + '0']
                 self.network.params_dict = new_params
 
-            t = Trainer(self.network, self.loss(N=n_train_round), trn_data,
+            t = Trainer(self.network, self.loss(N=n_train_round),
+                        trn_data=trn_data, trn_inputs=trn_inputs,
                         monitor=self.monitor_dict_from_names(monitor),
                         seed=self.gen_newseed(), **kwargs)
 

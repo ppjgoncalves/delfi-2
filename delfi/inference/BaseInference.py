@@ -123,7 +123,7 @@ class BaseInference(metaclass=ABCMetaDoc):
         """Creates observables dict"""
         self.observables = {}
         self.observables['loss.lprobs'] = self.network.lprobs
-        for p in self.network.params:
+        for p in self.network.aps:
             self.observables[str(p)] = p
 
     def monitor_dict_from_names(self, monitor=None):
