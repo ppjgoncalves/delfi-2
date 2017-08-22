@@ -21,23 +21,9 @@ Gaussian
   :inherited-members:
   :members:
 
-Mixture of Gaussians
-````````````````````
-.. autoclass:: delfi.distribution.mixture.MoG
-  :show-inheritance:
-  :inherited-members:
-  :members:
-
 Student's T
 ```````````
 .. autoclass:: delfi.distribution.StudentsT
-  :show-inheritance:
-  :inherited-members:
-  :members:
-
-Mixture of Student's T
-``````````````````````
-.. autoclass:: delfi.distribution.mixture.MoT
   :show-inheritance:
   :inherited-members:
   :members:
