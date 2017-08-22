@@ -11,7 +11,7 @@ dtype = theano.config.floatX
 
 
 class Trainer:
-    def __init__(self, network, loss, trn_data, val_data=None,
+    def __init__(self, network, loss, trn_data,
                  step=lu.adam, max_norm=0.1, monitor=None, seed=None):
         """Construct and configure the trainer
 
@@ -27,8 +27,6 @@ class Trainer:
             Loss function to be computed for network training
         trn_data : array
             Training data in the form (params, stats)
-        val_data : array
-            Validation data in the form (params, stats)
         step : function
             Function to call for updates, will pass gradients and parameters
         max_norm : float
@@ -74,33 +72,8 @@ class Trainer:
             updates=self.updates
         )
 
-        # if validation data is given, then set up validation too
-        if val_data is not None:
-            # prepare validation data
-            n_val_data_list = set([x.shape[0] for x in val_data])
-            assert len(
-                n_val_data_list) == 1, 'Number of validation data is not consistent.'
-            self.n_val_data = list(n_val_data_list)[0]
-            val_data = [theano.shared(x.astype(dtype)) for x in val_data]
-
-            # compile theano function for validation
-            val_inputs = [
-                model.input] if val_target is None else [
-                model.input, val_target]
-            self.validate = theano.function(
-                inputs=[],
-                outputs=val_loss,
-                givens=list(zip(val_inputs, val_data))
-            )
-        else:
-            self.validate = None
-
         # initialize variables
         self.loss = float('inf')
-        self.loss_val = float('inf')
-        self.loss_val_min = float('inf')
-        self.loss_val_min_iter = None
-        self.loss_val_min_params = None
 
         # pointers to model from self for better debugging
         self.idx = idx
@@ -116,7 +89,6 @@ class Trainer:
               pdb_iter=None,
               stop_on_nan=False,
               tol=None,
-              tol_val=None,
               verbose=False):
         """Trains the model
 
@@ -134,8 +106,6 @@ class Trainer:
             if True, will stop if loss becomes NaN
         tol : float
             tolerance criterion for stopping based on training set
-        tol_val : float
-            tolerance criterion for stopping based on validation set
         verbose : bool
             if True, print progress during training
 
@@ -148,17 +118,7 @@ class Trainer:
         # initialize variables
         iter = 0
 
-        progress_trn_iter = []
-        progress_trn_val = []
-        progress_trn_out = []
-        progress_trn_obs = []
-
-        progress_val_iter = []
-        progress_val_val = []
-
         minibatch = self.n_trn_data if minibatch is None else minibatch
-        monitor_every = float(
-            'inf') if monitor_every is None else monitor_every
 
         trn_outputs = {}
         for key in self.trn_outputs_names:
@@ -179,20 +139,6 @@ class Trainer:
                 self.loss = trn_loss
 
                 iter += 1
-
-                if iter % monitor_every == 0:
-
-                    if self.validate is not None:
-                        progress_val_iter.append(iter)
-                        val_loss = self.validate()
-                        progress_val_val.append(val_loss)
-                        diff_val = self.loss_val - val_loss
-                        self.loss_val = val_loss
-
-                        if self.loss_val < self.loss_val_min:
-                            self.loss_val_min = self.loss_val
-                            self.loss_val_min_iter = iter
-                            self.loss_val_min_params = self.model.get_params()
 
                 # check for convergence
                 if tol is not None:
