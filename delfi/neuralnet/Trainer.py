@@ -39,16 +39,16 @@ class Trainer:
         seed : int or None
             If provided, random number generator for batches will be seeded
         """
-        self.net = network
+        self.network = network
         self.loss = loss
 
         # gradients
-        grads = tt.grad(self.loss, self.net.params)
+        grads = tt.grad(self.loss, self.network.params)
         if max_norm is not None:
             grads = lu.total_norm_constraint(grads, max_norm=max_norm)
 
         # updates
-        self.updates = step(grads, self.net.params)
+        self.updates = step(grads, self.network.params)
 
         # prepare train data
         trn_data_vars = [theano.shared(x.astype(dtype)) for x in trn_data]
@@ -59,7 +59,7 @@ class Trainer:
 
         # theano function for single batch update
         idx = tt.ivector('idx')
-        trn_inputs = [self.net.y] + [self.net.x]  # trn_data is (params, stats)
+        trn_inputs = [self.network.y] + [self.network.x]  # trn_data is (params, stats)
         trn_inputs_data = [x[idx] for x in trn_data_vars]
         self.trn_outputs_names = ['loss']
         self.trn_outputs_nodes = [self.loss]
