@@ -128,8 +128,8 @@ class CDELFI(BaseInference):
 
                 # set weights of new network
                 # weights of additional components are duplicates
-                for p in [s for s in new_params if 'means' in s
-                          or 'precisions' in s]:
+                for p in [s for s in new_params if 'means' in s or
+                          'precisions' in s]:
                     new_params[p] = old_params[p[:-1] + '0']
                 self.network.params_dict = new_params
 
