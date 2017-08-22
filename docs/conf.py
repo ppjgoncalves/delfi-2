@@ -295,3 +295,8 @@ def rst_link_transform(docname):
     if docname == 'index':
         return 'wiki'
     return 'wiki/' + docname.title()
+
+# -------------------------------------------------------------------------
+
+# always include __init__
+autoclass_content = 'both'
