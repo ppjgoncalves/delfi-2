@@ -110,7 +110,7 @@ class Trainer:
         self.idx_stream = ds.IndexSubSampler(self.n_trn_data, seed=seed)
 
     def train(self,
-              epochs=1000,
+              epochs=100,
               minibatch=50,
               monitor_every=None,
               pdb_iter=None,
