@@ -31,7 +31,7 @@ class BaseGenerator(metaclass=ABCMetaDoc):
         self.summary = summary
         self.proposal = None
 
-    def gen(self, n_samples, n_reps=1, skip_feedback=False, verbose=False):
+    def gen(self, n_samples, n_reps=1, skip_feedback=False, verbose=True):
         """Draw parameters and run forward model
 
         Parameters
