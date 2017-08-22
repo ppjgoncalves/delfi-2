@@ -64,7 +64,7 @@ class Basic(BaseInference):
         neural net, a loss function and the generated training data. Train the
         network with the specified training arguments.
 
-        Paramerets
+        Parameters
         ----------
         n_train : int
             Number of training samples

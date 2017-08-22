@@ -2,6 +2,7 @@ import abc
 import numpy as np
 
 from delfi.utils.meta import ABCMetaDoc
+from delfi.utils.progress import no_tqdm, progressbar
 
 
 class BaseSimulator(metaclass=ABCMetaDoc):
@@ -23,7 +24,7 @@ class BaseSimulator(metaclass=ABCMetaDoc):
         self.rng = np.random.RandomState(seed=seed)
         self.seed = seed
 
-    def gen(self, params_list, n_reps=1):
+    def gen(self, params_list, n_reps=1, verbose=True):
         """Forward model for simulator for list of parameters
 
         Parameters
@@ -32,6 +33,9 @@ class BaseSimulator(metaclass=ABCMetaDoc):
             List of parameter vectors, each of which will be simulated
         n_reps : int
             If greater than 1, generate multiple samples given param
+        verbose : bool or str
+            If False, will not display progress bars. If a string is passed,
+            the string will be set as a description for the progress bar.
 
         Returns
         -------
@@ -40,14 +44,23 @@ class BaseSimulator(metaclass=ABCMetaDoc):
             repetitions. Each dictionary must contain a key data that contains
             the results of the forward run. Additional entries can be present.
         """
-        data_list = []
-        for param in params_list:
-            rep_list = []
-            for r in range(n_reps):
-                rep_list.append(self.gen_single(param))
-            data_list.append(rep_list)
+        if verbose == False:
+            pbar = no_tqdm()
+        else:
+            pbar = progressbar(total=len(params_list))
+            if type(verbose) == str:
+                pbar.set_description(verbose + ' ')
 
-        return data_list
+        with pbar:
+            data_list = []
+            for param in params_list:
+                rep_list = []
+                for r in range(n_reps):
+                    rep_list.append(self.gen_single(param))
+                data_list.append(rep_list)
+                pbar.update(1)
+
+            return data_list
 
     @abc.abstractmethod
     def gen_single(self, params):

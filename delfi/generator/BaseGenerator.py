@@ -2,8 +2,6 @@ import abc
 import numpy as np
 
 from delfi.utils.meta import ABCMetaDoc
-from delfi.utils.progress import no_tqdm, progressbar
-from tqdm import tqdm
 
 
 class BaseGenerator(metaclass=ABCMetaDoc):
@@ -55,82 +53,72 @@ class BaseGenerator(metaclass=ABCMetaDoc):
         """
         assert n_reps == 1, 'n_reps > 1 is not yet supported'
 
-        if verbose == False:
-            pbar = no_tqdm()
-        else:
-            pbar = progressbar(total=n_samples)
-            if type(verbose) == str:
-                pbar.set_description(verbose + ' ')
 
-        with pbar:
+        # collect valid parameter vectors from the prior
+        params = []  # list of parameter vectors
+        i = 0
+        while i < n_samples:
+            # sample parameter
+            if self.proposal is None:
+                proposed_param = self.prior.gen(n_samples=1)  # dim params,
+            else:
+                proposed_param = self.proposal.gen(n_samples=1)
 
-            # collect valid parameter vectors from the prior
-            params = []  # list of parameter vectors
-            i = 0
-            while i < n_samples:
-                # sample parameter
-                if self.proposal is None:
-                    proposed_param = self.prior.gen(n_samples=1)  # dim params,
-                else:
-                    proposed_param = self.proposal.gen(n_samples=1)
+            # check if parameter vector is valid
+            response = self._feedback_proposed_param(proposed_param)
+            if response == 'accept' or skip_feedback:
+                # add valid param vector to list
+                params.append(proposed_param.reshape(-1))
+                i += 1
+            elif response == 'resample':
+                continue  # continue without increment on i
+            else:
+                raise ValueError('response not supported')
 
-                # check if parameter vector is valid
-                response = self._feedback_proposed_param(proposed_param)
-                if response == 'accept' or skip_feedback:
-                    # add valid param vector to list
-                    params.append(proposed_param.reshape(-1))
-                    i += 1
-                elif response == 'resample':
-                    continue  # continue without increment on i
-                else:
-                    raise ValueError('response not supported')
+        # run forward model for all params, each n_reps times
+        result = self.model.gen(params, n_reps=n_reps, verbose=verbose)
 
-            # run forward model for all params, each n_reps times
-            result = self.model.gen(params, n_reps=n_reps)
+        # for every datum in data, check validity
+        params_data_valid = []  # list of params with valid data
+        data_valid = []  # list of lists containing n_reps dicts with data
+        for param, datum in zip(params, result):
+            # check validity
+            response = self._feedback_forward_model(data_valid)
+            if response == 'accept' or skip_feedback:
+                data_valid.append(datum)
+                # if data is accepted, accept the param as well
+                params_data_valid.append(param)
+            elif response == 'discard':
+                continue
+            else:
+                raise ValueError('response not supported')
 
-            # for every datum in data, check validity
-            params_data_valid = []  # list of params with valid data
-            data_valid = []  # list of lists containing n_reps dicts with data
-            for param, datum in zip(params, result):
-                # check validity
-                response = self._feedback_forward_model(data_valid)
-                if response == 'accept' or skip_feedback:
-                    data_valid.append(datum)
-                    # if data is accepted, accept the param as well
-                    params_data_valid.append(param)
-                elif response == 'discard':
-                    continue
-                else:
-                    raise ValueError('response not supported')
+        # for every data in data, calculate summary stats
+        final_params = []
+        final_stats = []  # list of summary stats
+        for param, datum in zip(params_data_valid, data_valid):
+            # calculate summary statistics
+            sum_stats = self.summary.calc(datum)  # n_reps x dim stats
 
-            # for every data in data, calculate summary stats
-            final_params = []
-            final_stats = []  # list of summary stats
-            for param, datum in zip(params_data_valid, data_valid):
-                # calculate summary statistics
-                sum_stats = self.summary.calc(datum)  # n_reps x dim stats
+            # check validity
+            response = self._feedback_summary_stats(sum_stats)
+            if response == 'accept' or skip_feedback:
+                final_stats.append(sum_stats)
+                # if sum stats is accepted, accept the param as well
+                final_params.append(param)
+                i += 1
+            elif response == 'discard':
+                i += 1
+            else:
+                raise ValueError('response not supported')
 
-                # check validity
-                response = self._feedback_summary_stats(sum_stats)
-                if response == 'accept' or skip_feedback:
-                    final_stats.append(sum_stats)
-                    # if sum stats is accepted, accept the param as well
-                    final_params.append(param)
-                    i += 1
-                    pbar.update(1)
-                elif response == 'discard':
-                    i += 1
-                    pbar.update(1)
-                else:
-                    raise ValueError('response not supported')
+        # TODO: for n_reps > 1 duplicate params; reshape stats array
+        params = np.array(final_params)  # n_samples x n_reps x dim theta
+        # n_samples x n_reps x dim summary stats
+        stats = np.array(final_stats)
+        stats = stats.squeeze(axis=1)
 
-            # TODO: for n_reps > 1 duplicate params; reshape stats array
-            params = np.array(final_params)  # n_samples x n_reps x dim theta
-            # n_samples x n_reps x dim summary stats
-            stats = np.array(final_stats)
-            stats = stats.squeeze(axis=1)
-
-            return params, stats
+        return params, stats
 
     @abc.abstractmethod
     def _feedback_proposed_param(self, param):
