@@ -53,7 +53,6 @@ class BaseGenerator(metaclass=ABCMetaDoc):
         """
         assert n_reps == 1, 'n_reps > 1 is not yet supported'
 
-
         # collect valid parameter vectors from the prior
         params = []  # list of parameter vectors
         i = 0

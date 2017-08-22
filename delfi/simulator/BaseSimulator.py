@@ -44,7 +44,7 @@ class BaseSimulator(metaclass=ABCMetaDoc):
             repetitions. Each dictionary must contain a key data that contains
             the results of the forward run. Additional entries can be present.
         """
-        if verbose == False:
+        if verbose is False:
             pbar = no_tqdm()
         else:
             pbar = progressbar(total=len(params_list))
