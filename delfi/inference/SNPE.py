@@ -130,7 +130,7 @@ class SNPE(BaseInference):
             # number of training examples for this round
             if type(n_train) == list:
                 try:
-                    n_train_round = n_train[r-1]
+                    n_train_round = n_train[self.round-1]
                 except:
                     n_train_round = n_train[-1]
             else:
