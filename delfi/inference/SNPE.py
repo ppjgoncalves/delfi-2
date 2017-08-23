@@ -57,6 +57,9 @@ class SNPE(BaseInference):
         self.round = 0
         self.convert_to_T = convert_to_T
 
+        # placeholder for importance weights
+        self.network.iws = tt.vector('iws', dtype=dtype)
+
     def loss(self, N):
         """Loss function for training
 
@@ -65,25 +68,10 @@ class SNPE(BaseInference):
         N : int
             Number of training samples
         """
-        # importance weights for loss
-        if self.generator.proposal is not None:
-            prior = distribution_pyop(self.generator.prior)
-            proposal = distribution_pyop(self.generator.proposal)
-            y_zt = tt.constant(self.params_std, dtype=dtype) * self.network.params \
-                + tt.constant(self.params_mean, dtype=dtype)
-            prior_eval = prior(y_zt)
-            proposal_eval = proposal(y_zt)
-        else:
-            prior_eval = tt.constant(1.)
-            proposal_eval = tt.constant(1.)
-        iws = prior_eval / proposal_eval
-
-        loss = -tt.mean(iws * self.network.lprobs)
+        loss = -tt.mean(self.network.iws * self.network.lprobs)
 
         # adding nodes to dict s.t. they can be monitored during training
-        self.observables['loss.iws'] = iws
-        self.observables['loss.prior'] = prior_eval
-        self.observables['loss.proposal'] = proposal_eval
+        self.observables['loss.iws'] = self.network.iws
 
         if self.svi:
             if self.round == 1:
@@ -162,8 +150,20 @@ class SNPE(BaseInference):
             else:
                 n_train_round = n_train
 
+            # draw training data
             trn_data = self.gen(n_train_round)  # z-transformed params and stats
-            trn_inputs = [self.network.params, self.network.stats]
+
+            # precompute importance weights
+            iws = np.ones((n_train_round,))
+            if self.generator.proposal is not None:
+                params = self.params_std * trn_data[0] + self.params_mean
+                p_prior = self.generator.prior.eval(params, log=False)
+                p_proposal = self.generator.proposal.eval(params, log=False)
+                iws *= p_prior / p_proposal
+
+            trn_data = (trn_data[0], trn_data[1], iws)
+            trn_inputs = [self.network.params, self.network.stats,
+                          self.network.iws]
 
             t = Trainer(self.network, self.loss(N=n_train_round),
                         trn_data=trn_data, trn_inputs=trn_inputs,
