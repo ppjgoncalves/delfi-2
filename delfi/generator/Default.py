@@ -13,7 +13,7 @@ class Default(BaseGenerator):
         # samples might be drawn outside bounds due to proposal
         if isinstance(self.prior, dd.Uniform):
             if np.any(param < self.prior.lower) or \
-               np.any(param < self.prior.upper):
+               np.any(param > self.prior.upper):
                 return 'resample'
 
         return 'accept'
