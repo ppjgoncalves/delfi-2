@@ -41,7 +41,12 @@ class Trainer:
         self.loss = loss
         self.trn_data = trn_data
         self.trn_inputs = trn_inputs
+
         self.seed = seed
+        if seed is not None:
+            self.rng = np.random.RandomState(seed=seed)
+        else:
+            self.rng = np.random.RandomState()
 
         # gradients
         grads = tt.grad(self.loss, self.network.aps)
@@ -127,7 +132,7 @@ class Trainer:
 
                 # loop over batches
                 for trn_batch in iterate_minibatches(self.trn_data, minibatch,
-                                                     seed=self.seed):
+                                                     seed=self.gen_newseed()):
                     trn_batch = tuple(trn_batch)
 
                     outputs = self.make_update(*trn_batch)
@@ -155,6 +160,13 @@ class Trainer:
             trn_outputs[name] = np.asarray(value)
 
         return trn_outputs
+
+    def gen_newseed(self):
+        """Generates a new random seed"""
+        if self.seed is None:
+            return None
+        else:
+            return self.rng.randint(0, 2**31)
 
 
 def iterate_minibatches(trn_data, minibatch=10, seed=None):
