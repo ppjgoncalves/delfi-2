@@ -1,4 +1,3 @@
-import delfi.neuralnet.DataStream as ds
 import lasagne.updates as lu
 import numpy as np
 import theano
@@ -40,6 +39,9 @@ class Trainer:
         """
         self.network = network
         self.loss = loss
+        self.trn_data = trn_data
+        self.trn_inputs = trn_inputs
+        self.seed = seed
 
         # gradients
         grads = tt.grad(self.loss, self.network.aps)
@@ -49,16 +51,10 @@ class Trainer:
         # updates
         self.updates = step(grads, self.network.aps)
 
-        # prepare train data
-        trn_data_vars = [theano.shared(x.astype(dtype)) for x in trn_data]
+        # check trn_data
         n_trn_data_list = set([x.shape[0] for x in trn_data])
         assert len(n_trn_data_list) == 1, 'trn_data elements got different len'
-        self.n_trn_data = list(n_trn_data_list)[0]
-
-        # train data indexed for minibatches
-        idx = tt.ivector('idx')
-        self.idx_stream = ds.IndexSubSampler(self.n_trn_data, seed=seed)
-        trn_inputs_data = [x[idx] for x in trn_data_vars]
+        self.n_trn_data = trn_data[0].shape[0]
 
         # outputs
         self.trn_outputs_names = ['loss']
@@ -70,18 +66,13 @@ class Trainer:
 
         # function for single update
         self.make_update = theano.function(
-            inputs=[idx],
+            inputs=self.trn_inputs,
             outputs=self.trn_outputs_nodes,
-            givens=list(zip(trn_inputs, trn_inputs_data)),  # (x,y), (p[i],s[i])
             updates=self.updates
         )
 
         # initialize variables
         self.loss = float('inf')
-
-        # pointers to model from self for better debugging
-        self.trn_inputs = trn_inputs
-        self.trn_data = trn_data
 
     def train(self,
               epochs=100,
@@ -116,41 +107,80 @@ class Trainer:
         # initialize variables
         iter = 0
 
+        # minibatch size
         minibatch = self.n_trn_data if minibatch is None else minibatch
 
+        # placeholders for outputs
         trn_outputs = {}
         for key in self.trn_outputs_names:
             trn_outputs[key] = []
+
+        # cast trn_data
+        self.trn_data = [x.astype(dtype) for x in self.trn_data]
 
         # main training loop
         with progressbar(total=maxiter * minibatch) as pbar:
             pbar.set_description('Training ')
 
-            for iter in range(maxiter):
-                minibatch_idx = self.idx_stream.gen(minibatch)
-                outputs = self.make_update(minibatch_idx)
-                for name, value in zip(self.trn_outputs_names, outputs):
-                    trn_outputs[name].append(value)
+            # loop over epochs
+            for epoch in range(epochs):
 
-                trn_loss = trn_outputs['loss'][-1]
-                diff = self.loss - trn_loss
-                self.loss = trn_loss
+                # loop over batches
+                for trn_batch in iterate_minibatches(self.trn_data, minibatch,
+                                                     seed=self.seed):
+                    trn_batch = tuple(trn_batch)
 
-                iter += 1
+                    outputs = self.make_update(*trn_batch)
 
-                # check for convergence
-                if tol is not None:
-                    if abs(diff) < tol:
+                    for name, value in zip(self.trn_outputs_names, outputs):
+                        trn_outputs[name].append(value)
+
+                    trn_loss = trn_outputs['loss'][-1]
+                    diff = self.loss - trn_loss
+                    self.loss = trn_loss
+
+                    # check for convergence
+                    if tol is not None:
+                        if abs(diff) < tol:
+                            break
+
+                    # check for nan
+                    if stop_on_nan and np.isnan(trn_loss):
                         break
 
-                # check for nan
-                if stop_on_nan and np.isnan(trn_loss):
-                    break
-
-                pbar.update(minibatch)
+                    pbar.update(minibatch)
 
         # convert lists to arrays
         for name, value in trn_outputs.items():
             trn_outputs[name] = np.asarray(value)
 
         return trn_outputs
+
+
+def iterate_minibatches(trn_data, minibatch=10, seed=None):
+    """Minibatch iterator
+
+    Parameters
+    ----------
+    trn_data : tuple of arrays
+        Training daa
+    minibatch : int
+        Size of batches
+    seed : None or int
+        Seed for minibatch order
+
+    Returns
+    -------
+    trn_batch : tuple of arrays
+        Batch of training data
+    """
+    n_samples = len(trn_data[0])
+    indices = np.arange(n_samples)
+
+    rng = np.random.RandomState(seed=seed)
+    rng.shuffle(indices)
+
+    for start_idx in range(0, n_samples-minibatch+1, minibatch):
+        excerpt = indices[start_idx:start_idx + minibatch]
+
+        yield (trn_data[k][excerpt] for k in range(len(trn_data)))

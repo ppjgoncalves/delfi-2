@@ -7,7 +7,9 @@ import numpy as np
 from delfi.simulator.Gauss import Gauss
 
 
-def test_trainer_updates():
+def test_basic_inference():
+    # TODO: test against ground truth
+
     n_params = 2
 
     m = Gauss(dim=n_params)
@@ -20,3 +22,22 @@ def test_trainer_updates():
 
     # run with N samples
     out = res.run(100)
+
+def test_snpe_inference():
+    # TODO: test against ground truth
+
+    n_params = 2
+
+    m = Gauss(dim=n_params)
+    p = dd.Gaussian(m=np.zeros((n_params, )), S=np.eye(n_params))
+    s = ds.Identity()
+    g = dg.Default(model=m, prior=p, summary=s)
+
+    # observation
+    _, obs = g.gen(1)
+
+    # set up inference
+    res = infer.SNPE(g, obs=obs)
+
+    # run with N samples
+    out = res.run(n_train=100, n_rounds=2)
