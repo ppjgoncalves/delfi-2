@@ -4,7 +4,6 @@ import theano.tensor as tt
 
 from delfi.inference.BaseInference import BaseInference
 from delfi.neuralnet.Trainer import Trainer
-from delfi.neuralnet.loss.ops import distribution_pyop, kernel_pyop
 from delfi.neuralnet.loss.regularizer import svi_kl_init, svi_kl_zero
 
 dtype = theano.config.floatX
