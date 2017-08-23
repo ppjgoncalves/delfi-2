@@ -37,13 +37,13 @@ class BaseGenerator(metaclass=ABCMetaDoc):
         ----------
         n_samples : int
             Number of samples
-        n_reps: int, default=1
-            Number of repetitions per parameter sample, useful for stochastic simulations
+        n_reps: int
+            Number of repetitions per parameter sample
         skip_feedback: bool
             If True, feedback checks on params, data and sum stats are skipped
         verbose : bool or str
             If False, will not display progress bars. If a string is passed,
-            the string will be set as a description for the progress bar.
+            it will be appended to the description of the progress bar.
 
         Returns
         -------
@@ -54,11 +54,14 @@ class BaseGenerator(metaclass=ABCMetaDoc):
         """
         assert n_reps == 1, 'n_reps > 1 is not yet supported'
 
-        if verbose:
-            pbar = progressbar(total=n_samples)
-            pbar.set_description('Sampling ')
-        else:
+        if not verbose:
             pbar = no_tqdm()
+        else:
+            pbar = progressbar(total=n_samples)
+            desc = 'Draw parameters '
+            if type(verbose) == str:
+                desc += verbose
+            pbar.set_description(desc)
 
         # collect valid parameter vectors from the prior
         params = []  # list of parameter vectors

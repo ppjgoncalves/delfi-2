@@ -35,7 +35,7 @@ class BaseSimulator(metaclass=ABCMetaDoc):
             If greater than 1, generate multiple samples given param
         verbose : bool or str
             If False, will not display progress bars. If a string is passed,
-            the string will be set as a description for the progress bar.
+            it will be appended to the description of the progress bar.
 
         Returns
         -------
@@ -44,12 +44,14 @@ class BaseSimulator(metaclass=ABCMetaDoc):
             repetitions. Each dictionary must contain a key data that contains
             the results of the forward run. Additional entries can be present.
         """
-        if verbose is False:
+        if not verbose:
             pbar = no_tqdm()
         else:
             pbar = progressbar(total=len(params_list))
+            desc = 'Simulate '
             if type(verbose) == str:
-                pbar.set_description(verbose + ' ')
+                desc += verbose
+            pbar.set_description(desc)
 
         with pbar:
             data_list = []

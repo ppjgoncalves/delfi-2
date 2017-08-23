@@ -11,8 +11,8 @@ dtype = theano.config.floatX
 
 
 class SNPE(BaseInference):
-    def __init__(self, generator, obs, convert_to_T=False, reg_lambda=100.,
-                 seed=None, **kwargs):
+    def __init__(self, generator, obs, prior_norm=False, pilot_samples=100,
+                 convert_to_T=False, reg_lambda=100., seed=None, **kwargs):
         """Sequential neural posterior estimation (SNPE)
 
         Parameters
@@ -21,6 +21,13 @@ class SNPE(BaseInference):
             Generator instance
         obs : array
             Observation in the format the generator returns (1 x n_summary)
+        prior_norm : bool
+            If set to True, will z-transform params based on mean/std of prior
+        pilot_samples : None or int
+            If an integer is provided, a pilot run with the given number of
+            samples is run. The mean and std of the summary statistics of the
+            pilot samples will be subsequently used to z-transform summary
+            statistics.
         reg_lambda : float
             Precision parameter for weight regularizer if svi is True
         seed : int or None
@@ -40,7 +47,8 @@ class SNPE(BaseInference):
             Dictionary containing theano variables that can be monitored while
             training the neural network.
         """
-        super().__init__(generator, seed=seed, **kwargs)
+        super().__init__(generator, prior_norm=prior_norm,
+                         pilot_samples=pilot_samples, seed=seed, **kwargs)
         self.obs = obs
         self.reg_lambda = reg_lambda
         self.round = 0

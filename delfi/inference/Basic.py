@@ -6,7 +6,8 @@ from delfi.neuralnet.loss.regularizer import svi_kl_zero
 
 
 class Basic(BaseInference):
-    def __init__(self, generator, reg_lambda=100., seed=None, **kwargs):
+    def __init__(self, generator, prior_norm=False, pilot_samples=100,
+                 reg_lambda=100., seed=None, **kwargs):
         """Basic inference algorithm
 
         Uses samples from the prior for density estimation LFI. Network can be
@@ -16,6 +17,13 @@ class Basic(BaseInference):
         ----------
         generator : generator instance
             Generator instance
+        prior_norm : bool
+            If set to True, will z-transform params based on mean/std of prior
+        pilot_samples : None or int
+            If an integer is provided, a pilot run with the given number of
+            samples is run. The mean and std of the summary statistics of the
+            pilot samples will be subsequently used to z-transform summary
+            statistics.
         reg_lambda : float
             Precision parameter for weight regularizer if svi is True
         seed : int or None
@@ -35,7 +43,8 @@ class Basic(BaseInference):
             Dictionary containing theano variables that can be monitored while
             training the neural network.
         """
-        super().__init__(generator, seed=seed, **kwargs)
+        super().__init__(generator, prior_norm=prior_norm,
+                         pilot_samples=pilot_samples, seed=seed, **kwargs)
         self.reg_lambda = reg_lambda
 
     def loss(self, N):
