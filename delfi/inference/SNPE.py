@@ -28,6 +28,9 @@ class SNPE(BaseInference):
             samples is run. The mean and std of the summary statistics of the
             pilot samples will be subsequently used to z-transform summary
             statistics.
+        convert_to_T : bool or int
+            Convert proposal distribution to Student's T? If a number if given,
+            the number specifies the degrees of freedom
         reg_lambda : float
             Precision parameter for weight regularizer if svi is True
         seed : int or None
@@ -135,6 +138,21 @@ class SNPE(BaseInference):
         for r in range(n_rounds):
             self.round += 1
 
+            # if round > 1, set new proposal distribution before sampling
+            if self.round > 1:
+                # posterior becomes new proposal prior
+                proposal = self.predict(self.obs)  # see super
+
+                # convert proposal to student's T?
+                if self.convert_to_T is not None:
+                    if type(self.convert_to_T) == int:
+                        dofs = self.convert_to_T
+                    else:
+                        dofs = 10
+                    proposal = proposal.convert_to_T(dofs=dofs)
+
+                self.generator.proposal = proposal
+
             # number of training examples for this round
             if type(n_train) == list:
                 try:
@@ -154,14 +172,5 @@ class SNPE(BaseInference):
                         **kwargs)
             logs.append(t.train(epochs=epochs, minibatch=minibatch))
             trn_datasets.append(trn_data)
-
-            # posterior becomes new proposal prior
-            proposal = self.predict(self.obs)  # see super
-
-            # convert proposal to student's T?
-            if self.convert_to_T is not None or 0:
-                proposal = proposal.convert_to_T(dofs=10)
-
-            self.generator.proposal = proposal
 
         return logs, trn_datasets
