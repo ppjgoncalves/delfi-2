@@ -56,7 +56,7 @@ class BaseGenerator(metaclass=ABCMetaDoc):
 
         if verbose:
             pbar = progressbar(total=n_samples)
-            pbar.set_description('Drawing parameters ')
+            pbar.set_description('Sampling ')
         else:
             pbar = no_tqdm()
 
