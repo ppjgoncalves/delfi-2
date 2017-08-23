@@ -52,7 +52,7 @@ class CDELFI(BaseInference):
 
         super().__init__(generator, prior_norm=prior_norm,
                          pilot_samples=pilot_samples, seed=seed, **kwargs)
-        
+
         self.n_components = n_components
         self.obs = obs
         self.reg_lambda = reg_lambda
@@ -112,6 +112,12 @@ class CDELFI(BaseInference):
         trn_datasets = []
 
         for r in range(1, n_rounds + 1):  # start at 1
+            # if round > 1, set new proposal distribution before sampling
+            if r > 1:
+                # posterior becomes new proposal prior
+                posterior = self.predict(self.obs)
+                self.generator.proposal = posterior.project_to_gaussian()
+
             # number of training examples for this round
             if type(n_train) == list:
                 try:
@@ -149,10 +155,6 @@ class CDELFI(BaseInference):
 
             logs.append(t.train(epochs=epochs, minibatch=minibatch))
             trn_datasets.append(trn_data)
-
-            # posterior becomes new proposal prior
-            posterior = self.predict(self.obs)
-            self.generator.proposal = posterior.project_to_gaussian()
 
         return logs, trn_datasets
 
