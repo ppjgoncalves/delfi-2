@@ -60,15 +60,15 @@ def svi_kl_zero_diag_gauss(mps_wp, sps_wp, mps_bp, sps_bp, a=1.0):
     regularizer node
     """
     n_params = sum([mp.get_value().size for mp in mps_wp]) + \
-               sum([mp.get_value().size for mp in mps_bp])
+        sum([mp.get_value().size for mp in mps_bp])
 
-    mps_init = [theano.shared(0.*mp.get_value()) for mp in mps_wp] + \
-               [theano.shared(0.*mp.get_value()) for mp in mps_bp]
-    sps_init = [theano.shared(0.*sp.get_value() +
+    mps_init = [theano.shared(0. * mp.get_value()) for mp in mps_wp] + \
+               [theano.shared(0. * mp.get_value()) for mp in mps_bp]
+    sps_init = [theano.shared(0. * sp.get_value() +
                               np.log(np.sqrt(1.0 / sp.get_value().shape[0])))
                 for sp in sps_wp] + \
-               [theano.shared(0.*sp.get_value() +
-                              a*np.log(np.sqrt(1.0 / sp.get_value().shape[0])))
+               [theano.shared(0. * sp.get_value() +
+                              a * np.log(np.sqrt(1.0 / sp.get_value().shape[0])))
                 for sp in sps_bp]
 
     mps = mps_wp + mps_bp
