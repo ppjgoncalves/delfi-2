@@ -23,6 +23,7 @@ def test_basic_inference():
     # run with N samples
     out = res.run(100)
 
+
 def test_snpe_inference():
     # TODO: test against ground truth
 
