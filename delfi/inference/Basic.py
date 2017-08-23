@@ -90,7 +90,7 @@ class Basic(BaseInference):
         trn_inputs = [self.network.params, self.network.stats]
 
         t = Trainer(self.network, self.loss(N=n_train),
-                    trn_data=trn_data, trn_inputs=trn_inputs, 
+                    trn_data=trn_data, trn_inputs=trn_inputs,
                     monitor=self.monitor_dict_from_names(monitor),
                     seed=self.gen_newseed(), **kwargs)
         log = t.train(epochs=epochs, minibatch=minibatch)
