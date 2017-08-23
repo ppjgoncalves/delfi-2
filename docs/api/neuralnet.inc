@@ -18,10 +18,3 @@ Trainer
   :show-inheritance:
   :inherited-members:
   :members:
-
-Data Stream
-```````````
-.. autoclass:: delfi.neuralnet.DataStream.DataStream
-  :show-inheritance:
-  :inherited-members:
-  :members:
