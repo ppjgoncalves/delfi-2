@@ -103,7 +103,7 @@ class BaseInference(metaclass=ABCMetaDoc):
 
     def pilot_run(self, n_samples):
         """Pilot run in order to find parameters for z-scoring stats"""
-        params, stats = self.generator.gen(n_samples, verbose='Pilot run ')
+        params, stats = self.generator.gen(n_samples, verbose='Simulating (Pilot run) ')
         self.stats_mean = stats.mean(axis=0)
         self.stats_std = stats.std(axis=0)
 
