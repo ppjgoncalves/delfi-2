@@ -1,7 +1,6 @@
 import delfi.neuralnet.DataStream as ds
 import lasagne.updates as lu
 import numpy as np
-import pdb
 import theano
 import theano.tensor as tt
 
@@ -88,7 +87,6 @@ class Trainer:
               epochs=100,
               minibatch=50,
               monitor_every=None,
-              pdb_iter=None,
               stop_on_nan=False,
               tol=None,
               verbose=False):
@@ -102,8 +100,6 @@ class Trainer:
             minibatch size
         monitor_every : int
             monitoring frequency
-        pdb_iter : int
-            if set, will set a breakpoint after given number of iterations
         stop_on_nan : bool (default: False)
             if True, will stop if loss becomes NaN
         tol : float
@@ -150,23 +146,6 @@ class Trainer:
                 # check for nan
                 if stop_on_nan and np.isnan(trn_loss):
                     break
-
-                # possible breakpoint
-                if pdb_iter is not None and pdb_iter == iter:
-                    mb = np.array(minibatch_idx)
-
-                    def get_outputs(outputs, minibatch_idx=mb):
-                        fun = theano.function(
-                            inputs=[self.idx],
-                            outputs=outputs,
-                            givens=list(zip(self.trn_inputs,
-                                            [x[self.idx] for x in
-                                             self.trn_data])),
-                            on_unused_input='ignore'
-                        )
-                        return fun(minibatch_idx.astype(np.int32))
-                    go = get_outputs
-                    pdb.set_trace()
 
                 pbar.update(minibatch)
 
