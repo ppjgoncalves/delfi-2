@@ -226,7 +226,3 @@ class NeuralNet(object):
                 'n_rnn': self.n_rnn,
                 'seed': self.seed,
                 'svi': self.svi}
-
-    def _consistent_init(self):
-        # TODO: init according to prior on weights
-        raise NotImplementedError
