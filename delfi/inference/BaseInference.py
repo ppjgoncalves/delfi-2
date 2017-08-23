@@ -86,7 +86,7 @@ class BaseInference(metaclass=ABCMetaDoc):
 
     def gen(self, n_samples, n_reps=1, verbose=False):
         """Generate from generator and z-transform"""
-        params, stats = self.generator.gen(n_samples, verbose='Draw data ')
+        params, stats = self.generator.gen(n_samples, verbose='Simulating ')
 
         # z-transform params and stats
         params = (params - self.params_mean) / self.params_std

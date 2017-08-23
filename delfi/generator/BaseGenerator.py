@@ -2,6 +2,7 @@ import abc
 import numpy as np
 
 from delfi.utils.meta import ABCMetaDoc
+from delfi.utils.progress import no_tqdm, progressbar
 
 
 class BaseGenerator(metaclass=ABCMetaDoc):
@@ -53,26 +54,35 @@ class BaseGenerator(metaclass=ABCMetaDoc):
         """
         assert n_reps == 1, 'n_reps > 1 is not yet supported'
 
+        if verbose:
+            pbar = progressbar(total=n_samples)
+            pbar.set_description('Drawing parameters ')
+        else:
+            pbar = no_tqdm()
+
         # collect valid parameter vectors from the prior
         params = []  # list of parameter vectors
-        i = 0
-        while i < n_samples:
-            # sample parameter
-            if self.proposal is None:
-                proposed_param = self.prior.gen(n_samples=1)  # dim params,
-            else:
-                proposed_param = self.proposal.gen(n_samples=1)
+        with pbar:
+            i = 0
+            while i < n_samples:
+                # sample parameter
+                if self.proposal is None:
+                    proposed_param = self.prior.gen(n_samples=1)  # dim params,
+                else:
+                    proposed_param = self.proposal.gen(n_samples=1)
 
-            # check if parameter vector is valid
-            response = self._feedback_proposed_param(proposed_param)
-            if response == 'accept' or skip_feedback:
-                # add valid param vector to list
-                params.append(proposed_param.reshape(-1))
-                i += 1
-            elif response == 'resample':
-                continue  # continue without increment on i
-            else:
-                raise ValueError('response not supported')
+                # check if parameter vector is valid
+                response = self._feedback_proposed_param(proposed_param)
+                if response == 'accept' or skip_feedback:
+                    # add valid param vector to list
+                    params.append(proposed_param.reshape(-1))
+                    i += 1
+                    pbar.update(1)
+                elif response == 'resample':
+                    # continue without increment on i or updating the bar
+                    continue
+                else:
+                    raise ValueError('response not supported')
 
         # run forward model for all params, each n_reps times
         result = self.model.gen(params, n_reps=n_reps, verbose=verbose)
@@ -111,7 +121,10 @@ class BaseGenerator(metaclass=ABCMetaDoc):
                 raise ValueError('response not supported')
 
         # TODO: for n_reps > 1 duplicate params; reshape stats array
-        params = np.array(final_params)  # n_samples x n_reps x dim theta
+
+        # n_samples x n_reps x dim theta
+        params = np.array(final_params)
+
         # n_samples x n_reps x dim summary stats
         stats = np.array(final_stats)
         stats = stats.squeeze(axis=1)
