@@ -135,6 +135,12 @@ class NeuralNet(object):
         self.mps = ll.get_all_params(last_mog, mp=True)  # means
         self.sps = ll.get_all_params(last_mog, sp=True)  # log stds
 
+        # weight and bias parameter sets as seperate lists
+        self.mps_wp = ll.get_all_params(last_mog, mp=True, wp=True)
+        self.sps_wp = ll.get_all_params(last_mog, sp=True, wp=True)
+        self.mps_bp = ll.get_all_params(last_mog, mp=True, bp=True)
+        self.sps_bp = ll.get_all_params(last_mog, sp=True, bp=True)
+
         # theano functions
         self.compile_funs()
 

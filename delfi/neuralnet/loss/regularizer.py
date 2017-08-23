@@ -35,10 +35,65 @@ def svi_kl_init(mps, sps):
     return L
 
 
+def svi_kl_zero_diag_gauss(mps_wp, sps_wp, mps_bp, sps_bp, a=1.0):
+    """Regularization for SVI such that parameters stay close to zero
+
+    The covariance matrix is a diagonal Gaussian. Entries on the diagonal are
+    set according to 1/N_in where N_in is the number of incoming connections.
+    For bias parameters, a*1/N_in.
+
+    Parameters
+    ----------
+    mps_wp : list
+        means of weight parameters
+    sps_wp : list
+        log stds of weight parameters
+    mps_bp : list
+        means of bias parameters
+    sps_bp : list
+        log stds of bias parameters
+    a : float
+        multiplies variance of bias parameters
+
+    Returns
+    -------
+    regularizer node
+    """
+    n_params = sum([mp.get_value().size for mp in mps_wp]) + \
+               sum([mp.get_value().size for mp in mps_bp])
+
+    mps_init = [theano.shared(0.*mp.get_value()) for mp in mps_wp] + \
+               [theano.shared(0.*mp.get_value()) for mp in mps_bp]
+    sps_init = [theano.shared(0.*sp.get_value() +
+                              np.log(np.sqrt(1.0 / sp.get_value().shape[0])))
+                for sp in sps_wp] + \
+               [theano.shared(0.*sp.get_value() +
+                              a*np.log(np.sqrt(1.0 / sp.get_value().shape[0])))
+                for sp in sps_bp]
+
+    mps = mps_wp + mps_bp
+    sps = sps_wp + sps_bp
+
+    logdet_Sigma1 = sum([tt.sum(2 * sp) for sp in sps])
+    logdet_Sigma2 = sum([tt.sum(2 * sp_init) for sp_init in sps_init])
+
+    tr_invSigma2_Sigma1 = sum([tt.sum(tt.exp(2 * (sp - sp_init)))
+                               for sp, sp_init in zip(sps, sps_init)])
+
+    quad_form = sum([tt.sum(((mp - mp_init)**2 / tt.exp(2 * sp_init)))
+                     for mp, mp_init, sp_init in zip(mps, mps_init, sps_init)])
+
+    L = 0.5 * (logdet_Sigma2 - logdet_Sigma1 -
+               n_params + tr_invSigma2_Sigma1 + quad_form)
+
+    return L
+
+
 def svi_kl_zero(mps, sps, wdecay):
     """Default regularization for SVI
 
-    We assume that the prior is a spherical zero-centred gaussian whose precision corresponds to the weight decay parameter.
+    Prior is a spherical zero-centered Gauss whose precision corresponds to the
+    weight decay parameter
 
     Parameters
     ----------
