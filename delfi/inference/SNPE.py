@@ -150,8 +150,8 @@ class SNPE(BaseInference):
                 n_train_round = n_train
 
             # draw training data (z-transformed params and stats)
-            trn_data = self.gen(n_train_round,
-                                verbose='(round {}) '.format(self.round))
+            verbose = '(round {}) '.format(self.round)
+            trn_data = self.gen(n_train_round, verbose=verbose)
 
             # precompute importance weights
             iws = np.ones((n_train_round,))
@@ -169,7 +169,7 @@ class SNPE(BaseInference):
                         trn_data=trn_data, trn_inputs=trn_inputs,
                         seed=self.gen_newseed(),
                         monitor=self.monitor_dict_from_names(monitor),
-                        **kwargs)
+                        verbose=verbose, **kwargs)
             logs.append(t.train(epochs=epochs, minibatch=minibatch))
             trn_datasets.append(trn_data)
 

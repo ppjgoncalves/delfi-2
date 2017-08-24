@@ -48,7 +48,7 @@ class BaseSimulator(metaclass=ABCMetaDoc):
             pbar = no_tqdm()
         else:
             pbar = progressbar(total=len(params_list))
-            desc = 'Run simulation '
+            desc = 'Run simulations '
             if type(verbose) == str:
                 desc += verbose
             pbar.set_description(desc)

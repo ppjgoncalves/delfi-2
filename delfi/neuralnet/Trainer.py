@@ -3,7 +3,7 @@ import numpy as np
 import theano
 import theano.tensor as tt
 
-from delfi.utils.progress import progressbar
+from delfi.utils.progress import no_tqdm, progressbar
 
 dtype = theano.config.floatX
 
@@ -123,10 +123,16 @@ class Trainer:
         # cast trn_data
         self.trn_data = [x.astype(dtype) for x in self.trn_data]
 
-        # main training loop
-        with progressbar(total=maxiter * minibatch) as pbar:
-            pbar.set_description('Training ')
+        if not verbose:
+            pbar = no_tqdm()
+        else:
+            pbar = progressbar(total=maxiter * minibatch)
+            desc = 'Training '
+            if type(verbose) == str:
+                desc += verbose
+            pbar.set_description(desc)
 
+        with pbar:
             # loop over epochs
             for epoch in range(epochs):
 

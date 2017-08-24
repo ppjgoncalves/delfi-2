@@ -128,8 +128,8 @@ class CDELFI(BaseInference):
                 n_train_round = n_train
 
             # draw training data (z-transformed params and stats)
-            trn_data = self.gen(n_train_round,
-                                verbose='(round {}) '.format(r))
+            verbose = '(round {}) '.format(r)
+            trn_data = self.gen(n_train_round, verbose=verbose)
             trn_inputs = [self.network.params, self.network.stats]
 
             # algorithm 2 of Papamakarios and Murray
@@ -153,8 +153,7 @@ class CDELFI(BaseInference):
             t = Trainer(self.network, self.loss(N=n_train_round),
                         trn_data=trn_data, trn_inputs=trn_inputs,
                         monitor=self.monitor_dict_from_names(monitor),
-                        seed=self.gen_newseed(), **kwargs)
-
+                        seed=self.gen_newseed(), verbose=verbose, **kwargs)
             logs.append(t.train(epochs=epochs, minibatch=minibatch))
             trn_datasets.append(trn_data)
 
