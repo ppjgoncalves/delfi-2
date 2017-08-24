@@ -3,7 +3,7 @@ delfi
 
 delfi is a Python package for density estimation likelihood-free inference.
 
-.. note:: The code in this repository is still experimental, and APIs are subject to change without warning.
+.. warning:: The code in this repository is still experimental, and APIs are subject to change without warning.
 
 You can install delfi from PyPI using:
 
