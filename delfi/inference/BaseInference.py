@@ -85,9 +85,9 @@ class BaseInference(metaclass=ABCMetaDoc):
     def run(self):
         pass
 
-    def gen(self, n_samples, n_reps=1, verbose=False):
+    def gen(self, n_samples, n_reps=1, verbose=True):
         """Generate from generator and z-transform"""
-        params, stats = self.generator.gen(n_samples, verbose=True)
+        params, stats = self.generator.gen(n_samples, verbose=verbose)
 
         # z-transform params and stats
         params = (params - self.params_mean) / self.params_std
@@ -104,7 +104,7 @@ class BaseInference(metaclass=ABCMetaDoc):
 
     def pilot_run(self, n_samples):
         """Pilot run in order to find parameters for z-scoring stats"""
-        params, stats = self.generator.gen(n_samples, verbose='(Pilot run) ')
+        params, stats = self.generator.gen(n_samples, verbose='(pilot run) ')
         self.stats_mean = stats.mean(axis=0)
         self.stats_std = stats.std(axis=0)
 
