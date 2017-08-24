@@ -153,8 +153,9 @@ class CDELFI(BaseInference):
             t = Trainer(self.network, self.loss(N=n_train_round),
                         trn_data=trn_data, trn_inputs=trn_inputs,
                         monitor=self.monitor_dict_from_names(monitor),
-                        seed=self.gen_newseed(), verbose=verbose, **kwargs)
-            logs.append(t.train(epochs=epochs, minibatch=minibatch))
+                        seed=self.gen_newseed(), **kwargs)
+            logs.append(t.train(epochs=epochs, minibatch=minibatch,
+                                verbose=verbose))
             trn_datasets.append(trn_data)
 
         return logs, trn_datasets

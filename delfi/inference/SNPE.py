@@ -169,8 +169,9 @@ class SNPE(BaseInference):
                         trn_data=trn_data, trn_inputs=trn_inputs,
                         seed=self.gen_newseed(),
                         monitor=self.monitor_dict_from_names(monitor),
-                        verbose=verbose, **kwargs)
-            logs.append(t.train(epochs=epochs, minibatch=minibatch))
+                        **kwargs)
+            logs.append(t.train(epochs=epochs, minibatch=minibatch,
+                                verbose=verbose))
             trn_datasets.append(trn_data)
 
         return logs, trn_datasets
