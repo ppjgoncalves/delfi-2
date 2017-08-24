@@ -74,17 +74,18 @@ class SNPE(BaseInference):
 
         if self.svi:
             if self.round == 1:
-                # keep weights close to zero-centered prior (first round)
-                kl = svi_kl_zero(self.network.mps, self.network.sps,
-                                 self.reg_lambda)
+                # weights close to zero-centered prior in the first round
+                kl, imvs = svi_kl_zero(self.network.mps, self.network.sps,
+                                       self.reg_lambda)
             else:
-                # keep weights close to the init (i.e., those of previous
-                # round)
-                kl = svi_kl_init(self.network.mps, self.network.sps)
+                # weights close to those of previous round
+                kl, imvs = svi_kl_init(self.network.mps, self.network.sps)
 
             loss = loss + 1 / N * kl
 
+            # adding nodes to dict s.t. they can be monitored
             self.observables['loss.kl'] = kl
+            self.observables.update(imvs)
 
         return loss
 

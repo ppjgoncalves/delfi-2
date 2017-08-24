@@ -59,8 +59,8 @@ class Basic(BaseInference):
 
         if self.svi:
             # keep weights close to zero-centered prior
-            kl = svi_kl_zero(self.network.mps, self.network.sps,
-                             self.reg_lambda)
+            kl, _ = svi_kl_zero(self.network.mps, self.network.sps,
+                                self.reg_lambda)
             loss = loss + 1/N * kl
 
         return loss

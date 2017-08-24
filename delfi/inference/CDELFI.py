@@ -68,12 +68,13 @@ class CDELFI(BaseInference):
         loss = -tt.mean(self.network.lprobs)
 
         if self.svi:
-            kl = svi_kl_zero(self.network.mps, self.network.sps,
-                             self.reg_lambda)
+            kl, imvs = svi_kl_zero(self.network.mps, self.network.sps,
+                                   self.reg_lambda)
             loss = loss + 1 / N * kl
 
             # adding nodes to dict s.t. they can be monitored
             self.observables['loss.kl'] = kl
+            self.observables.update(imvs)
 
         return loss
 
