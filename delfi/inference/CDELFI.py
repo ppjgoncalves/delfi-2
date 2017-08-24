@@ -9,7 +9,7 @@ from delfi.neuralnet.loss.regularizer import svi_kl_zero
 
 
 class CDELFI(BaseInference):
-    def __init__(self, generator, obs, prior_norm=False, pilot_samples=100,
+    def __init__(self, generator, obs, prior_norm=True, pilot_samples=100,
                  n_components=1, reg_lambda=100., seed=None, **kwargs):
         """Conditional density estimation likelihood-free inference (CDE-LFI)
 

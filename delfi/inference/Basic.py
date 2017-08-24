@@ -6,7 +6,7 @@ from delfi.neuralnet.loss.regularizer import svi_kl_zero
 
 
 class Basic(BaseInference):
-    def __init__(self, generator, prior_norm=False, pilot_samples=100,
+    def __init__(self, generator, prior_norm=True, pilot_samples=100,
                  reg_lambda=100., seed=None, **kwargs):
         """Basic inference algorithm
 
