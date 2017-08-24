@@ -151,7 +151,7 @@ class SNPE(BaseInference):
 
             # draw training data (z-transformed params and stats)
             trn_data = self.gen(n_train_round,
-                                verbose='round {}'.format(self.round))
+                                verbose='(round {}) '.format(self.round))
 
             # precompute importance weights
             iws = np.ones((n_train_round,))

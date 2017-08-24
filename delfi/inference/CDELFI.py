@@ -129,7 +129,7 @@ class CDELFI(BaseInference):
 
             # draw training data (z-transformed params and stats)
             trn_data = self.gen(n_train_round,
-                                verbose='round {}'.format(r))
+                                verbose='(round {}) '.format(r))
             trn_inputs = [self.network.params, self.network.stats]
 
             # algorithm 2 of Papamakarios and Murray
