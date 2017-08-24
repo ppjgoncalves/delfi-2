@@ -7,7 +7,7 @@ from delfi.utils.meta import ABCMetaDoc
 
 
 class BaseInference(metaclass=ABCMetaDoc):
-    def __init__(self, generator, prior_norm=False, pilot_samples=100,
+    def __init__(self, generator, prior_norm=True, pilot_samples=100,
                  seed=None, **kwargs):
         """Abstract base class for inference algorithms
 
