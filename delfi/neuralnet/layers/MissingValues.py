@@ -7,10 +7,10 @@ dtype = theano.config.floatX
 
 
 class ImputeMissingLayer(lasagne.layers.Layer):
-    def __init__(self, incoming, R=lasagne.init.Normal(0.01), **kwargs):
+    def __init__(self, incoming, n_inputs, R=lasagne.init.Normal(0.01), **kwargs):
         """Inputs that are NaN will be replaced by learned imputation value"""
         super(ImputeMissingLayer, self).__init__(incoming, **kwargs)
-        self.R = self.add_param(R, (self.input_shape[1],), name='R')
+        self.R = self.add_param(R, (*n_inputs,), name='R')
 
     def get_output_for(self, input, **kwargs):
         input_nan = tt.cast(tt.isnan(input), dtype)
@@ -32,5 +32,3 @@ class ReplaceMissingLayer(lasagne.layers.Layer):
 
     def get_output_shape_for(self, input_shape):
         return input_shape
-
-# TODO: replacement SVI layer

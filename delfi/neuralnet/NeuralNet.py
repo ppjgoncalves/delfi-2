@@ -15,12 +15,12 @@ dtype = theano.config.floatX
 
 class NeuralNet(object):
     def __init__(self, n_inputs, n_outputs, n_components=1, n_hiddens=[50, 50],
-                 n_rnn=None, seed=None, svi=True):
+                 n_rnn=None, impute_missing=True, seed=None, svi=True):
         """Initialize a mixture density network with custom layers
 
         Parameters
         ----------
-        n_inputs : int
+        n_inputs : int or tuple of ints
             Dimensionality of input
         n_outputs : int
             Dimensionality of output
@@ -30,11 +30,15 @@ class NeuralNet(object):
             Number of hidden units per layer
         n_rnn : None or int
             Number of RNN units
+        impute_missing : bool
+            If set to True, learns replacement value for NaNs, otherwise those
+            inputs are set to zero
         seed : int or None
             If provided, random number generator will be seeded
         svi : bool
             Whether to use SVI version or not
         """
+        self.impute_missing = impute_missing
         self.n_components = n_components
         self.n_hiddens = n_hiddens
         self.n_inputs = n_inputs
@@ -50,9 +54,15 @@ class NeuralNet(object):
         lasagne.random.set_rng(self.rng)
 
         # placeholders
-        # stats : input placeholder, (batch, self.n_inputs)
-        # params : output placeholder, (batch, self.n_outputs)
-        self.stats = tt.matrix('stats', dtype=dtype)
+        # input placeholder
+        # (batch, self.n_inputs) or (batch, self.n_inputs[0], self.n_inputs[1])
+        if type(self.n_inputs) == int:
+            self.stats = tt.matrix('stats', dtype=dtype)
+            self.n_inputs = (self.n_inputs, )  # cast to tuple
+        else:
+            self.stats = tt.tensor3('stats', dtype=dtype)
+        # output placeholder
+        # (batch, self.n_outputs)
         self.params = tt.matrix('params', dtype=dtype)
 
         # compose layers
@@ -60,10 +70,23 @@ class NeuralNet(object):
 
         # input layer
         self.layer['input'] = ll.InputLayer(
-            (None, self.n_inputs), input_var=self.stats)
-        # ... or substitute NaN for zero
-        # ... or learn replacement values
-        # ... or a recurrent neural net
+            (None, *self.n_inputs), input_var=self.stats)
+
+        # learn replacement values
+        if self.impute_missing:
+            self.layer['missing'] = dl.ImputeMissingLayer(last(self.layer),
+                                                          n_inputs=self.n_inputs)
+        else:
+            self.layer['missing'] = dl.ReplaceMissingLayer(last(self.layer))
+
+        # recurrent neural net
+        if n_rnn is not None:
+            self.layer['rs_1'] = ll.ReshapeLayer(last(self.layer),
+                                                 (-1, *n_inputs))
+            self.layer['rnn'] = ll.GRULayer(last(self.layer), n_rnn,
+                                            only_return_final=True)
+            self.layer['rs_2'] = ll.ReshapeLayer(last(self.layer),
+                                                 (-1, n_rnn))
 
         # hidden layers
         for l in range(len(n_hiddens)):
