@@ -14,13 +14,14 @@ dtype = theano.config.floatX
 
 
 class NeuralNet(object):
-    def __init__(self, n_inputs, n_outputs, n_components=1, n_filters=[], n_hiddens=[10, 10],
-                 n_rnn=None, seed=None, svi=True):
+    def __init__(self, n_inputs, n_outputs, n_components=1, n_filters=[],
+                 n_hiddens=[10, 10], n_rnn=None, impute_missing=True, seed=None,
+                 svi=True):
         """Initialize a mixture density network with custom layers
 
         Parameters
         ----------
-        n_inputs : (int, int)
+        n_inputs : int or tuple of ints
             Dimensionality of input
         n_outputs : int
             Dimensionality of output
@@ -32,18 +33,27 @@ class NeuralNet(object):
             Number of hidden units per fully connected layer
         n_rnn : None or int
             Number of RNN units
+        impute_missing : bool
+            If set to True, learns replacement value for NaNs, otherwise those
+            inputs are set to zero
         seed : int or None
             If provided, random number generator will be seeded
         svi : bool
             Whether to use SVI version or not
         """
+        self.impute_missing = impute_missing
         self.n_components = n_components
-        self.n_inputs = n_inputs
         self.n_filters = n_filters
-        self.n_rnn = n_rnn
         self.n_hiddens = n_hiddens
         self.n_outputs = n_outputs
         self.svi = svi
+
+        if n_rnn is None:
+            self.n_rnn = 0
+        else:
+            self.n_rnn = n_rnn
+        if self.n_rnn > 0 and len(self.n_filters) > 0:
+            raise NotImplementedError
 
         self.seed = seed
         if seed is not None:
@@ -52,13 +62,24 @@ class NeuralNet(object):
             self.rng = np.random.RandomState()
         lasagne.random.set_rng(self.rng)
 
-        # placeholders
-        # stats : input placeholder, (batch, self.n_inputs)
-        # params : output placeholder, (batch, self.n_outputs)
-        self.params = tt.matrix('params', dtype=dtype)
+        # cast n_inputs to tuple
+        if type(n_inputs) is int:
+            self.n_inputs = (n_inputs, )
+        elif type(n_inputs) is tuple:
+            self.n_inputs = n_inputs
+        else:
+            raise ValueError('n_inputs should be int or tuple')
 
         # compose layers
         self.layer = collections.OrderedDict()
+
+        # stats : input placeholder, (batch, *self.n_inputs)
+        if len(self.n_inputs)+1 == 2:
+            self.stats = tt.matrix('stats', dtype=dtype)
+        elif len(self.n_inputs)+1 == 3:
+            self.stats = tt.tensor3('stats', dtype=dtype)
+        elif len(self.n_inputs)+1 == 4:
+            self.stats = tt.tensor4('stats', dtype=dtype)
 
         # input layer
         if len(n_filters) > 0:
@@ -71,10 +92,58 @@ class NeuralNet(object):
             self.stats = tt.matrix('stats', dtype=dtype)
 
         self.layer['input'] = ll.InputLayer(
-            (None, *n_inputs), input_var=self.stats)
-        # ... or substitute NaN for zero
-        # ... or learn replacement values
-        # ... or a recurrent neural net
+            (None, *self.n_inputs), input_var=self.stats)
+
+        # learn replacement values
+        if self.impute_missing:
+            self.layer['missing'] = dl.ImputeMissingLayer(last(self.layer),
+                                                          n_inputs=self.n_inputs)
+        else:
+            self.layer['missing'] = dl.ReplaceMissingLayer(last(self.layer))
+
+        # recurrent neural net
+        # expects shape (batch, sequence_length, num_inputs)
+        if self.n_rnn > 0:
+            if len(self.n_inputs) == 1:
+                rs = (-1, *self.n_inputs, 1)
+                self.layer['rnn_reshape'] = ll.ReshapeLayer(last(self.layer), rs)
+
+            self.layer['rnn'] = ll.GRULayer(last(self.layer), n_rnn,
+                                            only_return_final=True)
+
+        # convolutional layers
+        # expects shape (batch, num_input_channels, input_rows, input_columns)
+        if len(self.n_filters) > 0:
+            # reshape
+            if len(self.n_inputs) == 1:
+                raise NotImplementedError
+            elif len(self.n_inputs) == 2:
+                rs = (-1, 1, *self.n_inputs)
+            else:
+                rs = None
+            if rs is not None:
+                self.layer['conv_reshape'] = ll.ReshapeLayer(last(self.layer), rs)
+
+            # add layers
+            for l in range(len(n_filters)):
+                self.layer['conv_' + str(l + 1)] = ll.Conv2DLayer(
+                    name='c' + str(l + 1),
+                    incoming=last(self.layer),
+                    num_filters=n_filters[l],
+                    filter_size=3,
+                    stride=(2, 2),
+                    pad=0,
+                    untie_biases=False,
+                    W=lasagne.init.GlorotUniform(),
+                    b=lasagne.init.Constant(0.),
+                    nonlinearity=lnl.rectify,
+                    flip_filters=True,
+                    convolution=tt.nnet.conv2d)
+
+        # flatten
+        self.layer['flatten'] = ll.FlattenLayer(
+            incoming=last(self.layer),
+            outdim=2)
 
         # convolutional layers
         for l in range(len(n_filters)):
@@ -118,6 +187,9 @@ class NeuralNet(object):
         last_mog = [self.layer['mixture_weights'],
                     self.layer['mixture_means'],
                     self.layer['mixture_precisions']]
+
+        # output placeholder
+        self.params = tt.matrix('params', dtype=dtype)  # (batch, self.n_outputs)
 
         # mixture parameters
         # a : weights, matrix with shape (batch, n_components)
