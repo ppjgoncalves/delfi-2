@@ -14,20 +14,22 @@ dtype = theano.config.floatX
 
 
 class NeuralNet(object):
-    def __init__(self, n_inputs, n_outputs, n_components=1, n_hiddens=[50, 50],
+    def __init__(self, n_inputs, n_outputs, n_components=1, n_filters=[], n_hiddens=[10, 10],
                  n_rnn=None, seed=None, svi=True):
         """Initialize a mixture density network with custom layers
 
         Parameters
         ----------
-        n_inputs : int
+        n_inputs : (int, int)
             Dimensionality of input
         n_outputs : int
             Dimensionality of output
         n_components : int
             Number of components of the mixture density
+        n_filters : list of ints
+            Number of filters  per convolutional layer
         n_hiddens : list of ints
-            Number of hidden units per layer
+            Number of hidden units per fully connected layer
         n_rnn : None or int
             Number of RNN units
         seed : int or None
@@ -36,10 +38,11 @@ class NeuralNet(object):
             Whether to use SVI version or not
         """
         self.n_components = n_components
-        self.n_hiddens = n_hiddens
         self.n_inputs = n_inputs
-        self.n_outputs = n_outputs
+        self.n_filters = n_filters
         self.n_rnn = n_rnn
+        self.n_hiddens = n_hiddens
+        self.n_outputs = n_outputs
         self.svi = svi
 
         self.seed = seed
@@ -52,24 +55,54 @@ class NeuralNet(object):
         # placeholders
         # stats : input placeholder, (batch, self.n_inputs)
         # params : output placeholder, (batch, self.n_outputs)
-        self.stats = tt.matrix('stats', dtype=dtype)
         self.params = tt.matrix('params', dtype=dtype)
 
         # compose layers
         self.layer = collections.OrderedDict()
 
         # input layer
+        if len(n_filters) > 0:
+            assert len(self.n_inputs) == 2
+            n_inputs = (1, *self.n_inputs)
+            self.stats = tt.tensor4('stats', dtype=dtype)
+        else:
+            n_inputs = (self.n_inputs, )
+
+            self.stats = tt.matrix('stats', dtype=dtype)
+
         self.layer['input'] = ll.InputLayer(
-            (None, self.n_inputs), input_var=self.stats)
+            (None, *n_inputs), input_var=self.stats)
         # ... or substitute NaN for zero
         # ... or learn replacement values
         # ... or a recurrent neural net
+
+        # convolutional layers
+        for l in range(len(n_filters)):
+            self.layer['conv_' + str(l + 1)] = ll.Conv2DLayer(
+                           name='c' + str(l + 1),
+                           incoming=last(self.layer),
+                           num_filters=n_filters[l],
+                           filter_size=3,
+                           stride=(2, 2),
+                           pad=0,
+                           untie_biases=False,
+                           W=lasagne.init.GlorotUniform(),
+                           b=lasagne.init.Constant(0.),
+                           nonlinearity=lasagne.nonlinearities.rectify,
+                           flip_filters=True,
+                           convolution=theano.tensor.nnet.conv2d)
+
+        self.layer['flatten'] = ll.FlattenLayer(
+                            incoming=last(self.layer),
+                            outdim=2)
+        # if len(n_filters)==0, this directly reshapes the input layer to 2D
 
         # hidden layers
         for l in range(len(n_hiddens)):
             self.layer['hidden_' + str(l + 1)] = dl.FullyConnectedLayer(
                 last(self.layer), n_units=n_hiddens[l],
                 svi=svi, name='h' + str(l + 1))
+
         last_hidden = last(self.layer)
 
         # mixture layers
@@ -105,6 +138,7 @@ class NeuralNet(object):
         # log probability of y given the mixture distribution
         # lprobs_comps : log probs per component, list of len n_components with (batch, )
         # probs : log probs of mixture, (batch, )
+
         self.lprobs_comps = [-0.5 * tt.sum(tt.sum((self.params - m).dimshuffle(
             [0, 'x', 1]) * U, axis=2)**2, axis=1) + ldetU
             for m, U, ldetU in zip(self.ms, self.Us, self.ldetUs)]
@@ -228,6 +262,7 @@ class NeuralNet(object):
         return {'n_inputs': self.n_inputs,
                 'n_outputs': self.n_outputs,
                 'n_components': self.n_components,
+                'n_filters': self.n_filters,
                 'n_hiddens': self.n_hiddens,
                 'n_rnn': self.n_rnn,
                 'seed': self.seed,

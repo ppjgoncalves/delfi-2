@@ -283,7 +283,7 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
                     if samples is not None:
                         H, xedges, yedges = np.histogram2d(
                             samples[i, :], samples[j, :], bins=30, normed=True)
-                        ax[i, j].imshow(H.T, origin='lower', extent=[
+                        ax[i, j].imshow(np.flipud(H), origin='lower', extent=[
                                         xedges[0], xedges[-1], yedges[0], yedges[-1]])
 
                     xx = np.linspace(lims[i, 0], lims[i, 1], resolution)
@@ -295,16 +295,16 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
                     pp = pp.reshape(list(X.shape))
                     if contours:
                         ax[i, j].contour(X, Y, probs2contours(
-                            pp, levels), levels, colors=('w', 'y'))
+                            np.flipud(pp.T), levels), levels, colors=('w', 'y'))
                     else:
-                        ax[i, j].imshow(pp, origin='lower', cmap=cmaps.parula,
+                        ax[i, j].imshow(pp.T, origin='lower', cmap=cmaps.parula,
                                         extent=[lims[i, 0], lims[i, 1], lims[j, 0], lims[j, 1]],
                                         aspect='auto', interpolation='none')
                     ax[i, j].set_xlim(lims[i])
                     ax[i, j].set_ylim(lims[j])
 
                     if gt is not None:
-                        ax[i, j].plot(gt[i], gt[j], 'r.', ms=10,
+                        ax[i, j].plot(gt[j], gt[i], 'r.', ms=10,
                                       markeredgewidth=0.0)
 
                     ax[i, j].get_xaxis().set_ticks([])
