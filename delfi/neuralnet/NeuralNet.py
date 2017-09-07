@@ -21,7 +21,7 @@ class NeuralNet(object):
 
         Parameters
         ----------
-        n_inputs : int or tuple of ints
+        n_inputs : int or tuple of ints or list of ints
             Dimensionality of input
         n_outputs : int
             Dimensionality of output
@@ -65,10 +65,12 @@ class NeuralNet(object):
         # cast n_inputs to tuple
         if type(n_inputs) is int:
             self.n_inputs = (n_inputs, )
+        elif type(n_inputs) is list:
+            self.n_inputs = tuple(n_inputs)
         elif type(n_inputs) is tuple:
             self.n_inputs = n_inputs
         else:
-            raise ValueError('n_inputs should be int or tuple')
+            raise ValueError('n_inputs type not supported')
 
         # compose layers
         self.layer = collections.OrderedDict()
@@ -82,15 +84,6 @@ class NeuralNet(object):
             self.stats = tt.tensor4('stats', dtype=dtype)
 
         # input layer
-        if len(n_filters) > 0:
-            assert len(self.n_inputs) == 2
-            n_inputs = (1, *self.n_inputs)
-            self.stats = tt.tensor4('stats', dtype=dtype)
-        else:
-            n_inputs = (self.n_inputs, )
-
-            self.stats = tt.matrix('stats', dtype=dtype)
-
         self.layer['input'] = ll.InputLayer(
             (None, *self.n_inputs), input_var=self.stats)
 
@@ -144,27 +137,6 @@ class NeuralNet(object):
         self.layer['flatten'] = ll.FlattenLayer(
             incoming=last(self.layer),
             outdim=2)
-
-        # convolutional layers
-        for l in range(len(n_filters)):
-            self.layer['conv_' + str(l + 1)] = ll.Conv2DLayer(
-                           name='c' + str(l + 1),
-                           incoming=last(self.layer),
-                           num_filters=n_filters[l],
-                           filter_size=3,
-                           stride=(2, 2),
-                           pad=0,
-                           untie_biases=False,
-                           W=lasagne.init.GlorotUniform(),
-                           b=lasagne.init.Constant(0.),
-                           nonlinearity=lasagne.nonlinearities.rectify,
-                           flip_filters=True,
-                           convolution=theano.tensor.nnet.conv2d)
-
-        self.layer['flatten'] = ll.FlattenLayer(
-                            incoming=last(self.layer),
-                            outdim=2)
-        # if len(n_filters)==0, this directly reshapes the input layer to 2D
 
         # hidden layers
         for l in range(len(n_hiddens)):
