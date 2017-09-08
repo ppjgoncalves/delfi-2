@@ -131,7 +131,6 @@ class CDELFI(BaseInference):
             # draw training data (z-transformed params and stats)
             verbose = '(round {}) '.format(r)
             trn_data = self.gen(n_train_round, verbose=verbose)
-            trn_inputs = [self.network.params, self.network.stats]
 
             # algorithm 2 of Papamakarios and Murray
             if r == n_rounds and self.n_components > 1:
@@ -150,6 +149,8 @@ class CDELFI(BaseInference):
                           'precisions' in s]:
                     new_params[p] = old_params[p[:-1] + '0']
                 self.network.params_dict = new_params
+
+            trn_inputs = [self.network.params, self.network.stats]
 
             t = Trainer(self.network, self.loss(N=n_train_round),
                         trn_data=trn_data, trn_inputs=trn_inputs,
