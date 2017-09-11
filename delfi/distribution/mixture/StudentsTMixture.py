@@ -51,8 +51,7 @@ class MoT(BaseMixture):
             super().__init__(
                 a=np.asarray(a),
                 ncomp=len(xs),
-                ndim=np.asarray(
-                    xs[0]).ndim,
+                ndim=xs[0].ndim,
                 seed=seed)
             self.xs = xs
         else:
