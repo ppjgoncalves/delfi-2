@@ -36,7 +36,7 @@ def test_snpe_inference(n_params=2, seed=42):
     _, obs = g.gen(1)
 
     # set up inference
-    res = infer.SNPE(n_train=1000, n_rounds=1, obs=obs)
+    res = infer.SNPE(g, obs=obs, n_rounds=1)
 
     # run with N samples
     out = res.run(n_train=1000, n_rounds=2)
