@@ -159,6 +159,16 @@ class MoG(BaseMixture):
 
         return m, S
 
+    @property
+    def mean(self):
+        """Means"""
+        return self.calc_mean_and_cov()[0].reshape(-1)
+
+    @property
+    def std(self):
+        """Standard deviations of marginals"""
+        return np.sqrt(np.diag(self.calc_mean_and_cov()[1])).reshape(-1)
+
     def convert_to_T(self, dofs):
         """Convert to Mixture of Student's T distributions
 
