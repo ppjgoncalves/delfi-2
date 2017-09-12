@@ -116,16 +116,18 @@ def probs2contours(probs, levels):
     return contours
 
 
-def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
+def plot_pdf(pdf1, lims, pdf2=None, gt=None, contours=False, levels=(0.68, 0.95),
              resolution=500, labels_params=None, ticks=False, diag_only=False,
              diag_only_cols=4, diag_only_rows=4, figsize=(5, 5), fontscale=1,
-             partial=False, samples=None, col1='k', col2='b'):
+             partial=False, samples=None, col1='k', col2='b', col3='g'):
     """Plots marginals of a pdf, for each variable and pair of variables.
 
     Parameters
     ----------
-    pdf : object
+    pdf1 : object
     lims : array
+    pdf2 : object (or None)
+        If not none, visualizes pairwise marginals for second pdf on lower diagonal
     contours : bool
     levels : tuple
         For contours
@@ -151,7 +153,16 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
         color 1
     col2 : str
         color 2
+    col3 : str
+        color 3 (for pdf2 if provided)
     """
+
+    pdfs = (pdf1, pdf2)
+    colrs = (col2, col3)
+
+    if not (pdf1 is None or pdf2 is None):
+        assert pdf1.ndim == pdf2.ndim
+
     if samples is not None:
         contours = True
         if levels is None:
@@ -163,9 +174,9 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
             (lims_min.reshape(-1, 1), lims_max.reshape(-1, 1)), axis=1)
     else:
         lims = np.asarray(lims)
-        lims = np.tile(lims, [pdf.ndim, 1]) if lims.ndim == 1 else lims
+        lims = np.tile(lims, [pdf1.ndim, 1]) if lims.ndim == 1 else lims
 
-    if pdf.ndim == 1:
+    if pdf1.ndim == 1:
 
         fig, ax = plt.subplots(1, 1, facecolor='white', figsize=figsize)
 
@@ -176,8 +187,10 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
 
         xx = np.linspace(lims[0, 0], lims[0, 1], resolution)
 
-        pp = pdf.eval(xx[:, np.newaxis], log=False)
-        ax.plot(xx, pp, color=col2)
+        for pdf, col in zip(pdfs, col):
+            if pdf is not None:
+                pp = pdf.eval(xx[:, np.newaxis], log=False)
+                ax.plot(xx, pp, color=col)
         ax.set_xlim(lims[0])
         ax.set_ylim([0, ax.get_ylim()[1]])
         if gt is not None:
@@ -198,11 +211,11 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
 
         if not diag_only:
             if partial:
-                rows = min(3, pdf.ndim)
-                cols = min(3, pdf.ndim)
+                rows = min(3, pdf1.ndim)
+                cols = min(3, pdf1.ndim)
             else:
-                rows = pdf.ndim
-                cols = pdf.ndim
+                rows = pdf1.ndim
+                cols = pdf1.ndim
         else:
             cols = diag_only_cols
             rows = diag_only_rows
@@ -221,15 +234,18 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
                                       color=col1,
                                       edgecolor=col1)
                     xx = np.linspace(lims[i, 0], lims[i, 1], resolution)
-                    pp = pdf.eval(xx, ii=[i], log=False)
 
-                    if diag_only:
-                        c += 1
-                    else:
-                        r = i
-                        c = j
+                    for pdf, col in zip(pdfs, colrs):
+                        if pdf is not None:
+                            pp = pdf.eval(xx, ii=[i], log=False)
 
-                    ax[r, c].plot(xx, pp, color=col2)
+                            if diag_only:
+                                c += 1
+                            else:
+                                r = i
+                                c = j
+
+                            ax[r, c].plot(xx, pp, color=col)
                     ax[r, c].set_xlim(lims[i])
                     ax[r, c].set_ylim([0, ax[r, c].get_ylim()[1]])
 
@@ -274,7 +290,12 @@ def plot_pdf(pdf, lims, gt=None, contours=False, levels=(0.68, 0.95),
                     if diag_only:
                         continue
 
-                    if i > j:
+                    if i < j:
+                        pdf = pdfs[0]
+                    else:
+                        pdf = pdfs[1]
+
+                    if pdf is None:
                         ax[i, j].get_yaxis().set_visible(False)
                         ax[i, j].get_xaxis().set_visible(False)
                         ax[i, j].set_axis_off()
