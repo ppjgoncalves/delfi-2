@@ -16,8 +16,8 @@ class Uniform(BaseDistribution):
         seed : int or None
             If provided, random number generator will be seeded
         """
-        self.lower = np.asarray(lower)
-        self.upper = np.asarray(upper)
+        self.lower = np.atleast_1d(lower)
+        self.upper = np.atleast_1d(upper)
 
         assert self.lower.ndim == self.upper.ndim
         assert self.lower.ndim == 1
@@ -37,12 +37,12 @@ class Uniform(BaseDistribution):
     @copy_ancestor_docstring
     def eval(self, x, ii=None, log=True):
         # See BaseDistribution.py for docstring
-        if ii is not None:
-            raise NotImplementedError
+        if ii is None:
+            ii = np.arange(self.ndim)
 
-        N = np.asarray(x).shape[0]
+        N = np.atleast_2d(x).shape[0]
 
-        p = 1/np.prod(self.upper - self.lower)
+        p = 1/np.prod(self.upper[ii] - self.lower[ii])
         p = p*np.ones((N,))  # broadcasting
 
         if log:

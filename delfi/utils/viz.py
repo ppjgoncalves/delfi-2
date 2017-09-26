@@ -245,7 +245,11 @@ def plot_pdf(pdf1, lims, pdf2=None, gt=None, contours=False, levels=(0.68, 0.95)
                                 r = i
                                 c = j
 
+                    for pdf, col in zip(pdfs, colrs):
+                        if pdf is not None:
+                            pp = pdf.eval(xx, ii=[i], log=False)
                             ax[r, c].plot(xx, pp, color=col)
+
                     ax[r, c].set_xlim(lims[i])
                     ax[r, c].set_ylim([0, ax[r, c].get_ylim()[1]])
 
