@@ -48,7 +48,7 @@ class BaseInference(metaclass=ABCMetaDoc):
 
         # generate a sample to get input and output dimensions
         params, stats = generator.gen(1, skip_feedback=True, verbose=False)
-        kwargs.update({'n_inputs': stats.shape[1:],
+        kwargs.update({'n_inputs': stats.shape[1],
                        'n_outputs': params.shape[1],
                        'seed': self.gen_newseed()})
 
@@ -105,8 +105,8 @@ class BaseInference(metaclass=ABCMetaDoc):
     def pilot_run(self, n_samples):
         """Pilot run in order to find parameters for z-scoring stats"""
         params, stats = self.generator.gen(n_samples, verbose='(pilot run) ')
-        self.stats_mean = stats.mean(axis=0)
-        self.stats_std = stats.std(axis=0)
+        self.stats_mean = np.nanmean(stats,axis=0)
+        self.stats_std = np.nanstd(stats,axis=0)
 
     def predict(self, x):
         """Predict posterior given x
