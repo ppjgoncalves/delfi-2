@@ -105,8 +105,8 @@ class BaseInference(metaclass=ABCMetaDoc):
     def pilot_run(self, n_samples):
         """Pilot run in order to find parameters for z-scoring stats"""
         params, stats = self.generator.gen(n_samples, verbose='(pilot run) ')
-        self.stats_mean = np.nanmean(stats,axis=0)
-        self.stats_std = np.nanstd(stats,axis=0)
+        self.stats_mean = np.nanmean(stats, axis=0)
+        self.stats_std = np.nanstd(stats, axis=0)
 
     def predict(self, x):
         """Predict posterior given x
