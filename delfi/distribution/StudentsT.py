@@ -55,7 +55,7 @@ class StudentsT(BaseDistribution):
         lp *= -(self.dof + self.ndim) / 2.0
         lp += np.log(scipy.special.gamma((self.dof + self.ndim) / 2))
         lp -= scipy.special.gammaln(self.dof / 2) + \
-            self.ndim / 2 * np.log(self.dof * np.pi) + 0.5 * self.logdetP
+            self.ndim / 2 * np.log(self.dof * np.pi) - 0.5 * self.logdetP
 
         res = lp if log else np.exp(lp)
         return res

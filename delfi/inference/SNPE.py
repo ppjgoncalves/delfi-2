@@ -11,7 +11,7 @@ dtype = theano.config.floatX
 
 class SNPE(BaseInference):
     def __init__(self, generator, obs, prior_norm=True, pilot_samples=100,
-                 convert_to_T=False, reg_lambda=100., seed=None, **kwargs):
+                 convert_to_T=None, reg_lambda=100., seed=None, **kwargs):
         """Sequential neural posterior estimation (SNPE)
 
         Parameters
@@ -27,9 +27,9 @@ class SNPE(BaseInference):
             samples is run. The mean and std of the summary statistics of the
             pilot samples will be subsequently used to z-transform summary
             statistics.
-        convert_to_T : bool or int
+        convert_to_T : None or int
             Convert proposal distribution to Student's T? If a number if given,
-            the number specifies the degrees of freedom
+            the number specifies the degrees of freedom. None for no conversion
         reg_lambda : float
             Precision parameter for weight regularizer if svi is True
         seed : int or None
@@ -75,8 +75,11 @@ class SNPE(BaseInference):
         if self.svi:
             if self.round == 1:
                 # weights close to zero-centered prior in the first round
-                kl, imvs = svi_kl_zero(self.network.mps, self.network.sps,
-                                       self.reg_lambda)
+                if self.reg_lambda > 0:
+                    kl, imvs = svi_kl_zero(self.network.mps, self.network.sps,
+                                           self.reg_lambda)
+                else:
+                    kl, imvs = 0, {}            
             else:
                 # weights close to those of previous round
                 kl, imvs = svi_kl_init(self.network.mps, self.network.sps)
