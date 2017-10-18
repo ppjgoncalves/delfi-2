@@ -1,4 +1,4 @@
-# delfi [![Build Status](https://travis-ci.org/mackelab/delfi.svg?branch=master)](https://travis-ci.org/mackelab/delfi) [![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](http://www.mackelab.org/delfi/)
+# delfi [![Build Status](https://travis-ci.org/mackelab/delfi.svg?branch=master)](https://travis-ci.org/mackelab/delfi) [![PyPI version](https://badge.fury.io/py/delfi.svg)](https://badge.fury.io/py/delfi) [![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](http://www.mackelab.org/delfi/)
 
 delfi is a Python package for density estimation likelihood-free inference.
 
