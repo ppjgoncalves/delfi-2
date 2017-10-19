@@ -89,7 +89,7 @@ class Trainer:
         self.loss = float('inf')
 
     def train(self,
-              epochs=100,
+              epochs=250,
               minibatch=50,
               monitor_every=None,
               stop_on_nan=False,
