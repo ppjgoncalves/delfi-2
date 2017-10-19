@@ -10,7 +10,8 @@ dtype = theano.config.floatX
 
 class Trainer:
     def __init__(self, network, loss, trn_data, trn_inputs,
-                 step=lu.adam, max_norm=0.1, monitor=None, seed=None):
+                 step=lu.adam, lr=0.001, lr_decay=1.0, max_norm=0.1,
+                 monitor=None, seed=None):
         """Construct and configure the trainer
 
         The trainer takes as inputs a neural network, a loss function and
@@ -29,6 +30,11 @@ class Trainer:
             Theano variables that should contain the the training data
         step : function
             Function to call for updates, will pass gradients and parameters
+        lr : float
+            initial learning rate
+        lr_decay : float
+            learning rate decay factor, learning rate for each epoch is
+            set to lr * (lr_decay**epoch)
         max_norm : float
             Total norm constraint for gradients
         monitor : dict
@@ -54,7 +60,10 @@ class Trainer:
             grads = lu.total_norm_constraint(grads, max_norm=max_norm)
 
         # updates
-        self.updates = step(grads, self.network.aps)
+        self.lr = lr
+        self.lr_decay = lr_decay
+        self.lr_op = theano.shared(np.array(self.lr, dtype=dtype))
+        self.updates = step(grads, self.network.aps, learning_rate=self.lr)
 
         # check trn_data
         n_trn_data_list = set([x.shape[0] for x in trn_data])
@@ -135,6 +144,9 @@ class Trainer:
         with pbar:
             # loop over epochs
             for epoch in range(epochs):
+                # set learning rate
+                lr_epoch = self.lr * (self.lr_decay**epoch)
+                self.lr_op.set_value(lr_epoch)
 
                 # loop over batches
                 for trn_batch in iterate_minibatches(self.trn_data, minibatch,
