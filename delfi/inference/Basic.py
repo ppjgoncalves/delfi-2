@@ -7,7 +7,7 @@ from delfi.neuralnet.loss.regularizer import svi_kl_zero
 
 class Basic(BaseInference):
     def __init__(self, generator, prior_norm=True, pilot_samples=100,
-                 reg_lambda=100., seed=None, **kwargs):
+                 reg_lambda=100., seed=None, verbose=True, **kwargs):
         """Basic inference algorithm
 
         Uses samples from the prior for density estimation LFI. Network can be
@@ -44,7 +44,8 @@ class Basic(BaseInference):
             training the neural network.
         """
         super().__init__(generator, prior_norm=prior_norm,
-                         pilot_samples=pilot_samples, seed=seed, **kwargs)
+                         pilot_samples=pilot_samples, seed=seed,
+                         verbose=verbose, **kwargs)
         self.reg_lambda = reg_lambda
 
     def loss(self, N):
@@ -93,15 +94,15 @@ class Basic(BaseInference):
         log: dict
             dict containing the loss values as returned by Trainer.train()
         trn_data : (params, stats)
-            training dataset
+            training dataset, z-transformed
         """
-        trn_data = self.gen(n_train)  # z-transformed params and stats
+        trn_data = self.gen(n_train, verbose=self.verbose)  # z-transformed
         trn_inputs = [self.network.params, self.network.stats]
 
         t = Trainer(self.network, self.loss(N=n_train),
                     trn_data=trn_data, trn_inputs=trn_inputs,
                     monitor=self.monitor_dict_from_names(monitor),
                     seed=self.gen_newseed(), **kwargs)
-        log = t.train(epochs=epochs, minibatch=minibatch)
+        log = t.train(epochs=epochs, minibatch=minibatch, verbose=self.verbose)
 
         return log, trn_data

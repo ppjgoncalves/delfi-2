@@ -10,7 +10,8 @@ from delfi.neuralnet.loss.regularizer import svi_kl_zero
 
 class CDELFI(BaseInference):
     def __init__(self, generator, obs, prior_norm=True, pilot_samples=100,
-                 n_components=1, reg_lambda=100., seed=None, **kwargs):
+                 n_components=1, reg_lambda=100., seed=None, verbose=True,
+                 **kwargs):
         """Conditional density estimation likelihood-free inference (CDE-LFI)
 
         Implementation of algorithms 1 and 2 of Papamakarios and Murray, 2016.
@@ -34,6 +35,8 @@ class CDELFI(BaseInference):
             Precision parameter for weight regularizer if svi is True
         seed : int or None
             If provided, random number generator will be seeded
+        verbose : bool
+            Controls whether or not progressbars are shown
         kwargs : additional keyword arguments
             Additional arguments for the NeuralNet instance, including:
                 n_hiddens : list of ints
@@ -51,7 +54,8 @@ class CDELFI(BaseInference):
         kwargs.update({'n_components': 1})
 
         super().__init__(generator, prior_norm=prior_norm,
-                         pilot_samples=pilot_samples, seed=seed, **kwargs)
+                         pilot_samples=pilot_samples, seed=seed,
+                         verbose=verbose, **kwargs)
 
         self.n_components = n_components
         self.obs = obs
@@ -107,7 +111,7 @@ class CDELFI(BaseInference):
         logs : list of dicts
             Dictionaries contain information logged while training the networks
         trn_datasets : list of (params, stats)
-            training datasets
+            training datasets, z-transformed
         """
         logs = []
         trn_datasets = []
@@ -129,7 +133,7 @@ class CDELFI(BaseInference):
                 n_train_round = n_train
 
             # draw training data (z-transformed params and stats)
-            verbose = '(round {}) '.format(r)
+            verbose = '(round {}) '.format(r) if self.verbose else False
             trn_data = self.gen(n_train_round, verbose=verbose)
 
             # algorithm 2 of Papamakarios and Murray

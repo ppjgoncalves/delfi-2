@@ -8,7 +8,7 @@ from delfi.utils.meta import ABCMetaDoc
 
 class BaseInference(metaclass=ABCMetaDoc):
     def __init__(self, generator, prior_norm=True, pilot_samples=100,
-                 seed=None, **kwargs):
+                 seed=None, verbose=True, **kwargs):
         """Abstract base class for inference algorithms
 
         Inference algorithms must at least implement abstract methods of this
@@ -41,6 +41,7 @@ class BaseInference(metaclass=ABCMetaDoc):
             self.rng = np.random.RandomState(seed=seed)
         else:
             self.rng = np.random.RandomState()
+        self.verbose = verbose
 
         # bind generator, reset proposal attribute
         self.generator = generator
@@ -85,8 +86,19 @@ class BaseInference(metaclass=ABCMetaDoc):
     def run(self):
         pass
 
-    def gen(self, n_samples, n_reps=1, verbose=True):
-        """Generate from generator and z-transform"""
+    def gen(self, n_samples, n_reps=1, verbose=None):
+        """Generate from generator and z-transform
+
+        Parameters
+        ----------
+        n_samples : int
+            Number of samples to generate
+        n_reps : int
+            Number of repeats per parameter
+        verbose : None or bool or str
+            If None is passed, will default to self.verbose
+        """
+        verbose = self.verbose if verbose is None else verbose
         params, stats = self.generator.gen(n_samples, verbose=verbose)
 
         # z-transform params and stats
@@ -103,8 +115,10 @@ class BaseInference(metaclass=ABCMetaDoc):
             return self.rng.randint(0, 2**31)
 
     def pilot_run(self, n_samples):
-        """Pilot run in order to find parameters for z-scoring stats"""
-        params, stats = self.generator.gen(n_samples, verbose='(pilot run) ')
+        """Pilot run in order to find parameters for z-scoring stats
+        """
+        verbose = '(pilot run) ' if self.verbose else False
+        params, stats = self.generator.gen(n_samples, verbose=verbose)
         self.stats_mean = np.nanmean(stats, axis=0)
         self.stats_std = np.nanstd(stats, axis=0)
 

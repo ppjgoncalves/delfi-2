@@ -11,7 +11,8 @@ dtype = theano.config.floatX
 
 class SNPE(BaseInference):
     def __init__(self, generator, obs, prior_norm=True, pilot_samples=100,
-                 convert_to_T=None, reg_lambda=100., seed=None, **kwargs):
+                 convert_to_T=None, reg_lambda=100., seed=None, verbose=True,
+                 **kwargs):
         """Sequential neural posterior estimation (SNPE)
 
         Parameters
@@ -34,6 +35,8 @@ class SNPE(BaseInference):
             Precision parameter for weight regularizer if svi is True
         seed : int or None
             If provided, random number generator will be seeded
+        verbose : bool
+            Controls whether or not progressbars are shown
         kwargs : additional keyword arguments
             Additional arguments for the NeuralNet instance, including:
                 n_components : int
@@ -50,7 +53,8 @@ class SNPE(BaseInference):
             training the neural network.
         """
         super().__init__(generator, prior_norm=prior_norm,
-                         pilot_samples=pilot_samples, seed=seed, **kwargs)
+                         pilot_samples=pilot_samples, seed=seed,
+                         verbose=verbose, **kwargs)
         self.obs = obs
         self.reg_lambda = reg_lambda
         self.round = 0
@@ -79,7 +83,7 @@ class SNPE(BaseInference):
                     kl, imvs = svi_kl_zero(self.network.mps, self.network.sps,
                                            self.reg_lambda)
                 else:
-                    kl, imvs = 0, {}            
+                    kl, imvs = 0, {}
             else:
                 # weights close to those of previous round
                 kl, imvs = svi_kl_init(self.network.mps, self.network.sps)
@@ -121,7 +125,7 @@ class SNPE(BaseInference):
         logs : list of dicts
             Dictionaries contain information logged while training the networks
         trn_datasets : list of (params, stats)
-            training datasets
+            training datasets, z-transformed
         """
         logs = []
         trn_datasets = []
@@ -154,7 +158,7 @@ class SNPE(BaseInference):
                 n_train_round = n_train
 
             # draw training data (z-transformed params and stats)
-            verbose = '(round {}) '.format(self.round)
+            verbose = '(round {}) '.format(self.round) if self.verbose else False
             trn_data = self.gen(n_train_round, verbose=verbose)
             n_train_round = trn_data[0].shape[0]
 

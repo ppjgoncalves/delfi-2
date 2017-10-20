@@ -13,7 +13,7 @@ dtype = theano.config.floatX
 class SNPEexp(BaseInference):
     def __init__(self, generator, obs, prior_norm=True, pilot_samples=100,
                  recover_adam=True, retain_data=False, convert_to_T=False,
-                 seed=None, **kwargs):
+                 seed=None, verbose=True, **kwargs):
         """Sequential neural posterior estimation (SNPE)
 
         With experimental features
@@ -40,6 +40,8 @@ class SNPEexp(BaseInference):
             If True, will do dataset retention
         seed : int or None
             If provided, random number generator will be seeded
+        verbose : bool
+            Controls whether or not progressbars are shown
         kwargs : additional keyword arguments
             Additional arguments for the NeuralNet instance, including:
                 n_components : int
@@ -56,7 +58,8 @@ class SNPEexp(BaseInference):
             training the neural network.
         """
         super().__init__(generator, prior_norm=prior_norm,
-                         pilot_samples=pilot_samples, seed=seed, **kwargs)
+                         pilot_samples=pilot_samples, seed=seed,
+                         verbose=verbose, **kwargs)
         self.obs = obs
         self.round = 0
         self.convert_to_T = convert_to_T
@@ -136,8 +139,7 @@ class SNPEexp(BaseInference):
         optim_state = []
         posteriors = []
 
-        verbose = True
-        if not verbose:
+        if not self.verbose:
             pbar = no_tqdm()
         else:
             pbar = progressbar(total=n_rounds)
@@ -173,7 +175,7 @@ class SNPEexp(BaseInference):
                     n_train_round = n_train
 
                 # draw training data (z-transformed params and stats)
-                verbose = '(round {}) '.format(self.round)
+                verbose = '(round {}) '.format(self.round) if self.verbose else False
                 trn_data = self.gen(n_train_round, verbose=False)
 
                 # precompute importance weights
@@ -209,7 +211,7 @@ class SNPEexp(BaseInference):
 
                 # train
                 logs.append(t.train(epochs=epochs, minibatch=minibatch,
-                                    verbose=False))
+                                    verbose=verbose))
 
                 # save state of optimizer
                 optim_state = [p.get_value() for p in t.updates.keys()]
