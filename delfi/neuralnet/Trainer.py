@@ -63,7 +63,7 @@ class Trainer:
         self.lr = lr
         self.lr_decay = lr_decay
         self.lr_op = theano.shared(np.array(self.lr, dtype=dtype))
-        self.updates = step(grads, self.network.aps, learning_rate=self.lr)
+        self.updates = step(grads, self.network.aps, learning_rate=self.lr_op)
 
         # check trn_data
         n_trn_data_list = set([x.shape[0] for x in trn_data])
