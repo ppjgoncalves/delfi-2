@@ -73,7 +73,7 @@ class Trainer:
         # outputs
         self.trn_outputs_names = ['loss']
         self.trn_outputs_nodes = [self.loss]
-        if monitor is not None:
+        if monitor is not None and len(monitor) > 0:
             monitor_names, monitor_nodes = zip(*monitor.items())
             self.trn_outputs_names += monitor_names
             self.trn_outputs_nodes += monitor_nodes

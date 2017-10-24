@@ -148,7 +148,8 @@ class BaseInference(metaclass=ABCMetaDoc):
             if isinstance(monitor, str):
                 monitor = [monitor]
             for m in monitor:
-                observe[m] = self.observables[m]
+                if m in self.observables:
+                    observe[m] = self.observables[m]
         else:
             observe = None
         return observe
