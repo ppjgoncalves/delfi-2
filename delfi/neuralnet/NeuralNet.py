@@ -92,7 +92,8 @@ class NeuralNet(object):
             self.layer['missing'] = dl.ImputeMissingLayer(last(self.layer),
                                                           n_inputs=self.n_inputs)
         else:
-            self.layer['missing'] = dl.ReplaceMissingLayer(last(self.layer))
+            self.layer['missing'] = dl.ReplaceMissingLayer(last(self.layer),
+                                                           n_inputs=self.n_inputs)
 
         # recurrent neural net
         # expects shape (batch, sequence_length, num_inputs)
