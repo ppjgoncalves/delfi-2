@@ -74,7 +74,9 @@ class SNPE(BaseInference):
         loss = -tt.mean(self.network.iws * self.network.lprobs)
 
         # adding nodes to dict s.t. they can be monitored during training
+        self.observables['loss.lprobs'] = self.network.lprobs
         self.observables['loss.iws'] = self.network.iws
+        self.observables['loss.raw_loss'] = loss
 
         if self.svi:
             if self.round == 1:
@@ -97,7 +99,7 @@ class SNPE(BaseInference):
         return loss
 
     def run(self, n_train=100, n_rounds=2, epochs=100, minibatch=50,
-            monitor=None, **kwargs):
+            stop_on_nan=False, monitor=None, **kwargs):
         """Run algorithm
 
         Parameters
@@ -117,6 +119,8 @@ class SNPE(BaseInference):
             Names of variables to record during training along with the value
             of the loss function. The observables attribute contains all
             possible variables that can be monitored
+        stop_on_nan : bool
+            If True, will halt if NaNs in the loss are encountered
         kwargs : additional keyword arguments
             Additional arguments for the Trainer instance
 
@@ -180,7 +184,8 @@ class SNPE(BaseInference):
                         monitor=self.monitor_dict_from_names(monitor),
                         **kwargs)
             logs.append(t.train(epochs=epochs, minibatch=minibatch,
-                                verbose=verbose))
+                                verbose=verbose, stop_on_nan=stop_on_nan))
+
             trn_datasets.append(trn_data)
 
         return logs, trn_datasets

@@ -12,6 +12,9 @@ from delfi.utils.odict import first, last, nth
 
 dtype = theano.config.floatX
 
+def MyLogSumExp(x, axis=None):
+    x_max = tt.max(x, axis=axis, keepdims=True)
+    return tt.log(tt.sum(tt.exp(x - x_max), axis=axis, keepdims=True)) + x_max
 
 class NeuralNet(object):
     def __init__(self, n_inputs, n_outputs, n_components=1, n_filters=[],
@@ -82,6 +85,8 @@ class NeuralNet(object):
             self.stats = tt.tensor3('stats', dtype=dtype)
         elif len(self.n_inputs)+1 == 4:
             self.stats = tt.tensor4('stats', dtype=dtype)
+        else:
+            raise NotImplementedError
 
         # input layer
         self.layer['input'] = ll.InputLayer(
@@ -187,9 +192,8 @@ class NeuralNet(object):
         self.lprobs_comps = [-0.5 * tt.sum(tt.sum((self.params - m).dimshuffle(
             [0, 'x', 1]) * U, axis=2)**2, axis=1) + ldetU
             for m, U, ldetU in zip(self.ms, self.Us, self.ldetUs)]
-        self.lprobs = tt.log(tt.sum(tt.exp(tt.stack(self.lprobs_comps,
-                                                    axis=1) + tt.log(self.a)),
-                                    axis=1)) - (0.5 * self.n_outputs * np.log(2 * np.pi))
+        self.lprobs = MyLogSumExp(tt.stack(self.lprobs_comps, axis=1) + tt.log(self.a), axis=1) \
+                      - (0.5 * self.n_outputs * np.log(2 * np.pi))
 
         # the quantities from above again, but with deterministic=True
         # --- in the svi case, this will disable injection of randomness;
@@ -205,9 +209,8 @@ class NeuralNet(object):
         self.dlprobs_comps = [-0.5 * tt.sum(tt.sum((self.params - m).dimshuffle(
             [0, 'x', 1]) * U, axis=2)**2, axis=1) + ldetU
             for m, U, ldetU in zip(self.dms, self.dUs, self.dldetUs)]
-        self.dlprobs = tt.log(tt.sum(tt.exp(tt.stack(self.dlprobs_comps,
-                                                     axis=1) + tt.log(self.da)),
-                                     axis=1)) - (0.5 * self.n_outputs * np.log(2 * np.pi))
+        self.dlprobs = MyLogSumExp(tt.stack(self.dlprobs_comps, axis=1) + tt.log(self.da), axis=1) \
+                       - (0.5 * self.n_outputs * np.log(2 * np.pi))
 
         # parameters of network
         self.aps = ll.get_all_params(last_mog)  # all parameters

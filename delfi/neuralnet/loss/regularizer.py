@@ -38,7 +38,15 @@ def svi_kl_init(mps, sps):
                n_params + tr_invSigma2_Sigma1 + quad_form)
 
     # intermediate values that can be monitored
+    imvs['reg.logdetP'] = -logdet_Sigma1
+
+    for i in range(len(mps)):
+        imvs['reg.mds{}'.format(i)] = mps[i] - mps_init[i]
+
     imvs['reg.quad_form'] = quad_form
+    imvs['reg.diff_logdet_Sigma'] = logdet_Sigma2 - logdet_Sigma1
+    imvs['reg.tr_invSigma2_Sigma1'] = tr_invSigma2_Sigma1 
+    imvs['reg.total_dkl'] = L 
 
     return L, imvs
 
