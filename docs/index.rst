@@ -9,7 +9,7 @@ You can install delfi from PyPI using:
 
 .. code-block:: console
 
-    pip install delfi --user
+    pip install delfi --user --process-dependency-links
 
 For more details on the installation, see :doc:`installation`.
 
