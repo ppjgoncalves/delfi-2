@@ -193,7 +193,7 @@ class NeuralNet(object):
             [0, 'x', 1]) * U, axis=2)**2, axis=1) + ldetU
             for m, U, ldetU in zip(self.ms, self.Us, self.ldetUs)]
         self.lprobs = MyLogSumExp(tt.stack(self.lprobs_comps, axis=1) + tt.log(self.a), axis=1) \
-                      - (0.5 * self.n_outputs * np.log(2 * np.pi))
+                      - (0.5 * self.n_outputs * np.log(2 * np.pi)).squeeze()
 
         # the quantities from above again, but with deterministic=True
         # --- in the svi case, this will disable injection of randomness;
@@ -210,7 +210,7 @@ class NeuralNet(object):
             [0, 'x', 1]) * U, axis=2)**2, axis=1) + ldetU
             for m, U, ldetU in zip(self.dms, self.dUs, self.dldetUs)]
         self.dlprobs = MyLogSumExp(tt.stack(self.dlprobs_comps, axis=1) + tt.log(self.da), axis=1) \
-                       - (0.5 * self.n_outputs * np.log(2 * np.pi))
+                       - (0.5 * self.n_outputs * np.log(2 * np.pi)).squeeze()
 
         # parameters of network
         self.aps = ll.get_all_params(last_mog)  # all parameters
