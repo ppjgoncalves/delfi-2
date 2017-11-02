@@ -323,10 +323,10 @@ def plot_pdf(pdf1, lims, pdf2=None, gt=None, contours=False, levels=(0.68, 0.95)
                             np.flipud(pp.T), levels), levels, colors=('w', 'y'))
                     else:
                         ax[i, j].imshow(pp.T, origin='lower', cmap=cmaps.parula,
-                                        extent=[lims[i, 0], lims[i, 1], lims[j, 0], lims[j, 1]],
+                                        extent=[lims[j, 0], lims[j, 1], lims[i, 0], lims[i, 1]],
                                         aspect='auto', interpolation='none')
-                    ax[i, j].set_xlim(lims[i])
-                    ax[i, j].set_ylim(lims[j])
+                    ax[i, j].set_xlim(lims[j])
+                    ax[i, j].set_ylim(lims[i])
 
                     if gt is not None:
                         ax[i, j].plot(gt[j], gt[i], 'r.', ms=10,
